@@ -10,7 +10,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/libraries/lucene-8.10.0/core/lucene-core-8.10.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/libraries/Lucene/lucene-8.10.0/core/lucene-core-8.10.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -19,7 +19,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/libraries/lucene-8.10.0/queryparser/lucene-queryparser-8.10.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/libraries/Lucene/lucene-8.10.0/queryparser/lucene-queryparser-8.10.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -38,6 +38,15 @@
       <library>
         <CLASSES>
           <root url="file://$MODULE_DIR$/libraries/Jsoup/jsoup-1.14.3.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libraries/Lucene/lucene-8.10.0/analysis/common/lucene-analyzers-common-8.10.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

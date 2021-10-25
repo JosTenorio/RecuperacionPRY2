@@ -1,20 +1,16 @@
+import Controlers.CollectionHandler;
 import Controlers.CollectionParser;
 
-import java.io.InputStreamReader;
-import java.util.Scanner;
+import java.io.IOException;
+
 
 public class main {
     public static void main(String[] args){
-        String collectionPath = null;
-        System.out.printf("Por favor ingrese la ruta de la colleción: \n >>");
-        try{
-            Scanner scanner = new Scanner(System.in);
-            collectionPath = scanner.nextLine();
-        } catch (Exception e) {
+        //Console.showMainMenu();
+        try {
+            CollectionHandler.testAnalyzer("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum feugiat elementum ex, pharetra laoreet turpis vestibulum sit amet. Sed at varius nibh. Integer consec");
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        CollectionParser col = new CollectionParser(collectionPath);
-        col.readFile();
-
-}
+    }
 }
