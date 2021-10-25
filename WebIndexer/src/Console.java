@@ -40,7 +40,16 @@ public class Console {
     }
 
     private static void indexCollection() {
-        System.out.println("Indizar colección");
+        System.out.println("\nIndexación de colecciones");
+        System.out.println("0. H0");
+        System.out.println("1. H0");
+        System.out.println("2. H0");
+        System.out.println("3. H0");
+        System.out.println("4. H0");
+        System.out.println("5. H0");
+        System.out.println("6. H0");
+        System.out.print("Favor digite el número de su selección: ");
+
     }
 
     private static void queryIndex() {
