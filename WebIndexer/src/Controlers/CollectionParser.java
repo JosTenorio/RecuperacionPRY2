@@ -1,31 +1,40 @@
 package Controlers;
 
-import Models.Document;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
+import org.apache.lucene.store.Directory;
 import org.jsoup.Jsoup;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Objects;
 import java.util.regex.Pattern;
-import org.jsoup.select.Elements;
-import org.jsoup.nodes.Element;
 
 
 public class CollectionParser {
-    String collectionPath;
-    ArrayList<Document> documents = new ArrayList<Document>();
 
-    public CollectionParser(String collectionPath) {
-        this.collectionPath = collectionPath;
+    private static File openCollection (String collectionPath) {
+        File f = new File(collectionPath);
+        if (f.exists() && !f.isDirectory()) {
+            return f;
+        }
+        return null;
     }
-    public void readFile()
+
+    public static void indexCollection(String collectionPath, String stopwordsPath, String indexPath)
     {
-        File collection = new File(this.collectionPath);
+        File collection = openCollection(collectionPath);
+        if (collection == null) {
+            System.out.println("\n No se ha podido abrir la colección indicada o esta no existe.");
+            return;
+        }
+        try {
+            Directory index = CollectionHandler.createIndex(indexPath);
+        } catch (IOException e) {
+            System.out.println("\n No se ha podido crear un índice en la dirección especificada.");
+            return;
+        }
         try( LineIterator lineIterator = FileUtils.lineIterator(collection,"UTF-8"))
         {
             org.jsoup.nodes.Document doc = null;
@@ -64,16 +73,14 @@ public class CollectionParser {
                     //End of the doc
                     BigInteger documentEnd = byteCount;
                     org.jsoup.nodes.Document document = Jsoup.parse(documentSource);
-
+                    /*
                     Elements Tags = document.select("h1, h2, h3, h4, h5, h6");
                     for(Element tag: Tags){
                         System.out.println(tag.text());
                     }
+                    */
                     docCount++;
-
                 }
-
-
             }
             System.out.println(byteCount);
             System.out.println("Habían "+docCount+" páginas");

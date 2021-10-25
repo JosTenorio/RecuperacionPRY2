@@ -100,3 +100,5 @@ hs_err_pid*
 WebIndexer/libraries/
 libraries
 WebIndexer/.idea/discord.xml
+
+WebIndexer/TestFiles/
