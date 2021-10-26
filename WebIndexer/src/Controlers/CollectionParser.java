@@ -30,15 +30,11 @@ public class CollectionParser {
             System.out.println("\n No se ha podido abrir la colección indicada o esta no existe.");
             return;
         }
-        try {
-            Directory index = CollectionHandler.createIndex(indexPath);
-        } catch (IOException e) {
-            System.out.println("\n No se ha podido crear un índice en la dirección especificada.");
+        if (CollectionHandler.primeCollection(stopwordsPath, indexPath) < 0) {
             return;
         }
         try( LineIterator lineIterator = FileUtils.lineIterator(collection,"UTF-8"))
         {
-            org.jsoup.nodes.Document doc = null;
             String currentDocString = "";
             currentDocString += lineIterator.nextLine();
             int docCount = 0;
@@ -74,13 +70,16 @@ public class CollectionParser {
                     //End of the doc
                     BigInteger documentEnd = byteCount;
                     ParsedDocument parsedDoc = HTMLHandler.parseHTML(documentSource);
-                    System.out.println("Document " + docCount + ": ");
+                    if (CollectionHandler.insertDocument(parsedDoc, documentEnd , documentEnd ) < 0) {
+                        return;
+                    }
                     docCount++;
                 }
             }
         } catch (IOException e)
         {
-            e.printStackTrace();
+            System.out.println("\n Error en la lectura del archivo fuente durante la indexación");
+            return;
         }
     }
 }
