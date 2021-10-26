@@ -44,7 +44,7 @@ public class CollectionParser {
             Pattern patDoctype = Pattern.compile(".*?<!DOCTYPE.*?>");
             while(lineIterator.hasNext())
             {
-                BigInteger documentStart;
+                BigInteger documentStart = BigInteger.valueOf((Integer) 0);
                 String currentLine = lineIterator.nextLine();
                 BigInteger linebytesize =  BigInteger.valueOf((Integer)(currentLine.getBytes(StandardCharsets.UTF_8).length));
                 byteCount = byteCount.add(linebytesize);
@@ -69,10 +69,12 @@ public class CollectionParser {
                     }
                     //End of the doc
                     BigInteger documentEnd = byteCount;
+                    /*
                     ParsedDocument parsedDoc = HTMLHandler.parseHTML(documentSource);
-                    if (CollectionHandler.insertDocument(parsedDoc, documentEnd , documentEnd ) < 0) {
+                    if (CollectionHandler.insertDocument(parsedDoc, documentStart, documentEnd ) < 0) {
                         return;
                     }
+                     */
                     docCount++;
                 }
             }

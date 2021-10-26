@@ -35,7 +35,7 @@ public class CollectionHandler {
     private static Analyzer analyzerWrapper;
     private static Directory dir;
 
-    private static void setAnalyzerWrapper (String stopwords) throws IOException {
+    public static void setAnalyzerWrapper (String stopwords, boolean wipe) throws IOException {
         analyzerWrapper = createWrapper(stopwords);
     }
 
@@ -52,7 +52,7 @@ public class CollectionHandler {
             return -1;
         }
         try {
-            setAnalyzerWrapper(stopwordsPath);
+            setAnalyzerWrapper(stopwordsPath, true);
         } catch (IOException e) {
             System.out.println("\n No se ha podido procesar el archivo de stopwords dado, o ha fallado el analizador.");
             return -1;
