@@ -58,7 +58,6 @@ public class HTMLHandler {
             if (matcher.find()) {
                 int indexF = matcher.end();
                 String relativeLink = link.substring(indexF);
-                System.out.println(indexF);
                 if (!result.contains(relativeLink))
                 result.add(relativeLink);
             }
