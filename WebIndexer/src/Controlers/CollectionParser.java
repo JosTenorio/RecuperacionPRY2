@@ -1,9 +1,10 @@
 package Controlers;
 
+import Models.ParsedDocument;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.lucene.store.Directory;
-import org.jsoup.Jsoup;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -29,20 +30,16 @@ public class CollectionParser {
             System.out.println("\n No se ha podido abrir la colección indicada o esta no existe.");
             return;
         }
-        try {
-            Directory index = CollectionHandler.createIndex(indexPath);
-        } catch (IOException e) {
-            System.out.println("\n No se ha podido crear un índice en la dirección especificada.");
+        if (CollectionHandler.primeCollection(stopwordsPath, indexPath) < 0) {
             return;
         }
         try( LineIterator lineIterator = FileUtils.lineIterator(collection,"UTF-8"))
         {
-            org.jsoup.nodes.Document doc = null;
             String currentDocString = "";
             currentDocString += lineIterator.nextLine();
             int docCount = 0;
             BigInteger byteCount = BigInteger.valueOf((Integer)(currentDocString.getBytes(StandardCharsets.UTF_8).length));
-            Pattern pathEndHtml =Pattern.compile("</html.*?>");
+            Pattern pathEndHtml = Pattern.compile("</html.*?>");
             Pattern patHtml = Pattern.compile("<html.*?>");
             Pattern patDoctype = Pattern.compile(".*?<!DOCTYPE.*?>");
             while(lineIterator.hasNext())
@@ -72,21 +69,17 @@ public class CollectionParser {
                     }
                     //End of the doc
                     BigInteger documentEnd = byteCount;
-                    org.jsoup.nodes.Document document = Jsoup.parse(documentSource);
-                    /*
-                    Elements Tags = document.select("h1, h2, h3, h4, h5, h6");
-                    for(Element tag: Tags){
-                        System.out.println(tag.text());
+                    ParsedDocument parsedDoc = HTMLHandler.parseHTML(documentSource);
+                    if (CollectionHandler.insertDocument(parsedDoc, documentEnd , documentEnd ) < 0) {
+                        return;
                     }
-                    */
                     docCount++;
                 }
             }
-            System.out.println(byteCount);
-            System.out.println("Habían "+docCount+" páginas");
         } catch (IOException e)
         {
-            e.printStackTrace();
+            System.out.println("\n Error en la lectura del archivo fuente durante la indexación");
+            return;
         }
     }
 }
