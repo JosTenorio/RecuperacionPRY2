@@ -80,7 +80,7 @@ public class QueryHandler {
     }
     private static void showResults(ScoreDoc[] result,IndexSearcher searcher) throws IOException {
         Scanner scanner = new Scanner(System.in);
-        String option;
+        String option = null;
         clearScreen();
         System.out.println("-------- Resultados --------");
         Document doc;
@@ -109,7 +109,7 @@ public class QueryHandler {
                         clearScreen();
                         Document selectedDoc = selectDoc(last20Docs);
                         if(selectedDoc==null){
-                            System.out.println("Error al elegir el do cumento");
+                            System.out.println("Error al elegir el documento");
                             return;
                         }
                         // Opens the selected document in browser
@@ -135,8 +135,35 @@ public class QueryHandler {
             last20Docs.add(doc);
             System.out.println("["+i+"]"+"Título del documento:  "+doc.get("titulo"));
         }
-        System.out.println("No quedan más documentos por consultar");
-
+        // Menu in case of less than 20 documents
+        if(result.length<20){
+            while(true) {
+                clearScreen();
+                System.out.println("-----Menú de opciones-----\n1 --> Obtener el documento de un resultado\n2 --> Obtener los enlaces de un documento\n3 ");
+                option = scanner.nextLine();
+                switch (option) {
+                    // Selects document to show
+                    case "1" -> {
+                        Document selectedDoc = selectDoc(last20Docs);
+                        if (selectedDoc == null) {
+                            System.out.println("Error al elegir el do cumento");
+                            return;
+                        }
+                        // Opens the selected document in browser
+                        //TODO: FIX HARDCODED COLLECTION FILE
+                        openInBrowser(selectedDoc, "D:\\Universidad\\Colecciones\\h8.txt");
+                        scanner.nextLine();
+                    }
+                    // Gets links of a document
+                    case "2" -> {
+                        }
+                    default -> {
+                        System.out.println("Terminando consulta");
+                        return;
+                    }
+                }
+            }
+        }
     }
     public static void clearScreen() {
         for (int i = 0; i < 50; i++) {
@@ -181,6 +208,5 @@ public class QueryHandler {
         byte[] readBytes = bytes.array();
         String htmlPage = new String(readBytes, StandardCharsets.UTF_8);
         System.out.println(htmlPage);
-
     }
 }
