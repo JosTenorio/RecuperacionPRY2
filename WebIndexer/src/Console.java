@@ -1,6 +1,11 @@
+import java.io.IOException;
+import java.net.Inet4Address;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import Controlers.*;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopDocs;
 
 public class Console {
 
@@ -57,6 +62,16 @@ public class Console {
     }
 
     private static void queryIndex() {
-        System.out.println("Indizar colección");
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("->Consultas en colección:  ");
+        System.out.println("Por favor ingrese la dirección del índice a utilizar:  ");
+        System.out.flush();
+        String indexPath = scanner.nextLine();
+        System.out.println("Por favor ingrese la consulta a realizar:  ");
+        String query = scanner.nextLine();
+        QueryHandler.searchQuery(query,indexPath);
+
     }
+
 }
+

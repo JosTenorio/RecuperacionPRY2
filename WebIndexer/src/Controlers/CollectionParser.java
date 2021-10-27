@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 public class CollectionParser {
 
-    private static File openCollection (String collectionPath) {
+    public static File openCollection (String collectionPath) {
         File f = new File(collectionPath);
         if (f.exists() && !f.isDirectory()) {
             return f;
@@ -42,9 +42,9 @@ public class CollectionParser {
             Pattern pathEndHtml = Pattern.compile("</html.*?>");
             Pattern patHtml = Pattern.compile("<html.*?>");
             Pattern patDoctype = Pattern.compile(".*?<!DOCTYPE.*?>");
+            BigInteger documentStart = BigInteger.valueOf((Integer) 0);
             while(lineIterator.hasNext())
             {
-                BigInteger documentStart = BigInteger.valueOf((Integer) 0);
                 String currentLine = lineIterator.nextLine();
                 BigInteger linebytesize =  BigInteger.valueOf((Integer)(currentLine.getBytes(StandardCharsets.UTF_8).length));
                 byteCount = byteCount.add(linebytesize);
@@ -58,10 +58,14 @@ public class CollectionParser {
 
                     // If we find an opening html tag then we need to parse all the content into a single string to open the document in jsoup
                     String documentSource = "";
-                    documentSource+=currentLine;
+                    documentSource = documentSource.concat(currentLine);
                     while(!pathEndHtml.matcher((currentLine)).matches())
                     {
                         // Gets next line and adds it to the source string
+                        if(!lineIterator.hasNext())
+                        {
+                            return;
+                        }
                         currentLine = lineIterator.nextLine();
                         documentSource+=currentLine;
                         linebytesize =  BigInteger.valueOf((Integer)(currentLine.getBytes(StandardCharsets.UTF_8).length));
@@ -69,12 +73,12 @@ public class CollectionParser {
                     }
                     //End of the doc
                     BigInteger documentEnd = byteCount;
-                    /*
+
                     ParsedDocument parsedDoc = HTMLHandler.parseHTML(documentSource);
                     if (CollectionHandler.insertDocument(parsedDoc, documentStart, documentEnd ) < 0) {
                         return;
                     }
-                     */
+
                     docCount++;
                 }
             }
