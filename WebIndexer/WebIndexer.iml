@@ -29,15 +29,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="file://$MODULE_DIR$/libraries/Apache/commons-io-2.11.0.jar" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="file://$MODULE_DIR$/libraries/Jsoup/jsoup-1.14.3.jar" />
         </CLASSES>
         <JAVADOC />
@@ -48,6 +39,15 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/libraries/Lucene/lucene-8.10.0/analysis/common/lucene-analyzers-common-8.10.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libraries/Apache/commons-io-2.11.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
