@@ -1,11 +1,6 @@
-import java.io.IOException;
-import java.net.Inet4Address;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import Controlers.*;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TopDocs;
 
 public class Console {
 
@@ -40,13 +35,14 @@ public class Console {
                     System.out.println("Terminando ejecución...");
                     System.exit(0);
                 }
-                default -> System.out.println("Error, no se reconoce al comando: '" + Integer.toString(option) + "', favor reintentar");
+                default -> System.out.println("Error, no se reconoce al comando: '" + option + "', favor reintentar");
             }
         }
     }
 
     private static void indexCollection() {
         Scanner scanner = new Scanner(System.in);
+        String stemmingOption;
         System.out.println("->Indexación de colecciones\n");
         System.out.print("Favor ingresar la dirección de la colección a indizar: ");
         System.out.flush();
@@ -57,7 +53,15 @@ public class Console {
         System.out.print("Favor ingresar la dirección del archivo en el cuál se almacenara el índice creado: ");
         System.out.flush();
         String indexPath = scanner.nextLine();
-        CollectionParser.indexCollection(collectionPath, stopwordsPath, indexPath);
+        System.out.print("Se debe aplicar stemming durante la indixación? (Y/N): ");
+        System.out.flush();
+        stemmingOption = scanner.nextLine();
+        while (!(stemmingOption.equals("Y") || stemmingOption.equals("y")  || stemmingOption.equals("N") || stemmingOption.equals("n"))){
+            System.out.print("Se debe aplicar stemming durante la indixación? (Y/N): ");
+            System.out.flush();
+            stemmingOption = scanner.nextLine();
+        }
+        CollectionParser.indexCollection(collectionPath, stopwordsPath, indexPath, (stemmingOption.equals("Y") || stemmingOption.equals("y")));
 
     }
 

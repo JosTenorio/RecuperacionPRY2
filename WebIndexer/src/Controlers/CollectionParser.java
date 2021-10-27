@@ -22,14 +22,14 @@ public class CollectionParser {
         return null;
     }
 
-    public static void indexCollection(String collectionPath, String stopwordsPath, String indexPath)
+    public static void indexCollection(String collectionPath, String stopwordsPath, String indexPath, boolean useStemmer)
     {
         File collection = openCollection(collectionPath);
         if (collection == null) {
             System.out.println("\n No se ha podido abrir la colección indicada o esta no existe.");
             return;
         }
-        if (CollectionHandler.primeCollection(stopwordsPath, indexPath) < 0) {
+        if (CollectionHandler.primeCollection(stopwordsPath, indexPath, useStemmer, true ) < 0) {
             return;
         }
         try( LineIterator lineIterator = FileUtils.lineIterator(collection,"UTF-8"))
@@ -77,10 +77,10 @@ public class CollectionParser {
                     if (CollectionHandler.insertDocument(parsedDoc, documentStart, documentEnd ) < 0) {
                         return;
                     }
-
                     docCount++;
                 }
             }
+            CollectionHandler.closeWriter();
         } catch (IOException e)
         {
             System.out.println("\n Error en la lectura del archivo fuente durante la indexación");
