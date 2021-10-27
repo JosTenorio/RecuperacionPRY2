@@ -42,9 +42,9 @@ public class CollectionParser {
             Pattern pathEndHtml = Pattern.compile("</html.*?>");
             Pattern patHtml = Pattern.compile("<html.*?>");
             Pattern patDoctype = Pattern.compile(".*?<!DOCTYPE.*?>");
+            BigInteger documentStart = BigInteger.valueOf((Integer) 0);
             while(lineIterator.hasNext())
             {
-                BigInteger documentStart = BigInteger.valueOf((Integer) 0);
                 String currentLine = lineIterator.nextLine();
                 BigInteger linebytesize =  BigInteger.valueOf((Integer)(currentLine.getBytes(StandardCharsets.UTF_8).length));
                 byteCount = byteCount.add(linebytesize);
