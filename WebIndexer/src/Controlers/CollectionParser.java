@@ -3,7 +3,6 @@ package Controlers;
 import Models.ParsedDocument;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
-import org.apache.lucene.store.Directory;
 
 
 import java.io.File;
