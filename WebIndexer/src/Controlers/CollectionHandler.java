@@ -15,6 +15,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.custom.CustomAnalyzer;
 import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 import org.apache.lucene.analysis.snowball.SnowballPorterFilterFactory;
+import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
@@ -79,15 +80,16 @@ public class CollectionHandler {
 
     private static void addDoc(IndexWriter w, ParsedDocument parsedDoc, BigInteger docBeginning, BigInteger docEnd) throws IOException {
         Document doc = new Document();
-        System.out.println(parsedDoc.headers);
         doc.add(new TextField("texto", parsedDoc.text, Field.Store.YES));
         doc.add(new TextField("ref", parsedDoc.ref, Field.Store.YES));
         doc.add(new TextField("encab", parsedDoc.headers, Field.Store.YES));
         doc.add(new TextField("titulo", parsedDoc.title, Field.Store.YES));
-        doc.add(new StringField("enlace",docBeginning.toString(), Field.Store.YES));
-        doc.add(new StringField("beginningByte",parsedDoc.enlace.toString(), Field.Store.YES));
+        doc.add(new StringField("enlace",parsedDoc.enlace.toString(), Field.Store.YES));
+        doc.add(new StringField("beginningByte",docBeginning.toString(), Field.Store.YES));
         doc.add(new StringField("endByte",docEnd.toString(), Field.Store.YES));
+
         w.addDocument(doc);
+
     }
 
     private static PerFieldAnalyzerWrapper createWrapper (String stopWordsFile) throws IOException {
@@ -106,6 +108,7 @@ public class CollectionHandler {
                         .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ]+)", "group", "0")
                         .addTokenFilter(SnowballPorterFilterFactory.class, "language", "Spanish")
                         .addTokenFilter("stop", "words", stopWordsFile)
+                        .addTokenFilter(LowerCaseFilterFactory.class)
                         .build()
                 :
                 CustomAnalyzer.builder()
