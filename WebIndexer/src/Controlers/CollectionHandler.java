@@ -15,15 +15,12 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.custom.CustomAnalyzer;
 import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 import org.apache.lucene.analysis.snowball.SnowballPorterFilterFactory;
-import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
@@ -35,20 +32,38 @@ public class CollectionHandler {
 
     private static Analyzer analyzerWrapper;
     private static Directory dir;
+    private static IndexWriter writer;
 
-    public static void setAnalyzerWrapper (String stopwords, boolean wipe) throws IOException {
-        analyzerWrapper = createWrapper(stopwords);
+    public static void setAnalyzerWrapper (String stopwords, boolean useStemmer) throws IOException {
+        analyzerWrapper = createWrapper(stopwords, useStemmer);
     }
+
     public static Analyzer getAnalyzerWrapper(){
         return analyzerWrapper;
     }
 
     private static void createIndex (String indexPath) throws IOException {
         dir = FSDirectory.open(Paths.get(indexPath));
-
     }
 
-    public static int primeCollection (String stopwordsPath, String indexPath) {
+    public static void closeWriter () throws IOException {
+        if ((writer != null) && (writer.isOpen())) {
+            writer.close();
+        }
+    }
+
+    public static void setAndOpenWriter (boolean recreateIndex) throws IOException {
+        IndexWriterConfig config = new IndexWriterConfig(analyzerWrapper);
+        if (recreateIndex) {
+            config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+        }
+        else {
+            config.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+        }
+        writer = new IndexWriter(dir, config);
+    }
+
+    public static int primeCollection (String stopwordsPath, String indexPath, boolean useStemmer, boolean recreateIndex) {
         try {
             createIndex(indexPath);
         } catch (IOException e) {
@@ -56,7 +71,8 @@ public class CollectionHandler {
             return -1;
         }
         try {
-            setAnalyzerWrapper(stopwordsPath, true);
+            setAnalyzerWrapper(stopwordsPath, useStemmer);
+            setAndOpenWriter(recreateIndex);
         } catch (IOException e) {
             System.out.println("\n No se ha podido procesar el archivo de stopwords dado, o ha fallado el analizador.");
             return -1;
@@ -65,12 +81,13 @@ public class CollectionHandler {
     }
 
     public static int insertDocument(ParsedDocument document, BigInteger docBeginning, BigInteger docEnd){
-        IndexWriter writer;
-        IndexWriterConfig config = new IndexWriterConfig(analyzerWrapper);
         try {
-            writer = new IndexWriter(dir, config);
-            addDoc(writer, document, docBeginning, docEnd);
-            writer.close();
+            if (writer.isOpen()){
+                addDoc(writer, document, docBeginning, docEnd);
+            } else {
+                System.out.println("\n El escritor creado se ha cerrrado antes de poder indexar un documento.");
+                return -1;
+            }
         } catch (IOException e) {
             System.out.println("\n No se ha podido acceder al índice creado para asignar un escritor.");
             return -1;
@@ -84,43 +101,52 @@ public class CollectionHandler {
         doc.add(new TextField("ref", parsedDoc.ref, Field.Store.YES));
         doc.add(new TextField("encab", parsedDoc.headers, Field.Store.YES));
         doc.add(new TextField("titulo", parsedDoc.title, Field.Store.YES));
-        doc.add(new StringField("enlace",parsedDoc.enlace.toString(), Field.Store.YES));
-        doc.add(new StringField("beginningByte",docBeginning.toString(), Field.Store.YES));
-        doc.add(new StringField("endByte",docEnd.toString(), Field.Store.YES));
-
+       // doc.add(new StringField("enlace",parsedDoc.enlace.toString(), Field.Store.YES));
+        doc.add(new StringField("beginningByte", docBeginning.toString(), Field.Store.YES));
+        doc.add(new StringField("endByte", docEnd.toString(), Field.Store.YES));
         w.addDocument(doc);
-
     }
 
-    private static PerFieldAnalyzerWrapper createWrapper (String stopWordsFile) throws IOException {
+    private static PerFieldAnalyzerWrapper createWrapper (String stopWordsFile, boolean useStemmer) throws IOException {
         Map<String, Analyzer> analyzerMap = new HashMap<>();
-        analyzerMap.put("texto", getSpanishAnalyzer(stopWordsFile, true));
-        analyzerMap.put("ref", getSpanishAnalyzer(stopWordsFile, false));
-        analyzerMap.put("encab", getSpanishAnalyzer(stopWordsFile, true));
-        analyzerMap.put("titulo", getSpanishAnalyzer(stopWordsFile, false));
+        analyzerMap.put("texto", getBodyAnalyzer(stopWordsFile, useStemmer));
+        analyzerMap.put("ref", getTitleAnalyzer(stopWordsFile));
+        analyzerMap.put("encab", getBodyAnalyzer(stopWordsFile, useStemmer));
+        analyzerMap.put("titulo", getTitleAnalyzer(stopWordsFile));
         return new PerFieldAnalyzerWrapper(new StandardAnalyzer(), analyzerMap);
     }
 
-    private static Analyzer getSpanishAnalyzer (String stopWordsFile, boolean useStemmer) throws IOException {
+    private static Analyzer getBodyAnalyzer (String stopWordsFile, boolean useStemmer) throws IOException {
         Analyzer analyzer;
         analyzer = useStemmer ?
                 CustomAnalyzer.builder()
-                        .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ]+)", "group", "0")
+                        .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ_]+)", "group", "0")
                         .addTokenFilter(SnowballPorterFilterFactory.class, "language", "Spanish")
                         .addTokenFilter("stop", "words", stopWordsFile)
-                        .addTokenFilter(LowerCaseFilterFactory.class)
+                        .addTokenFilter("lowercase")
                         .build()
                 :
                 CustomAnalyzer.builder()
-                        .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ]+)", "group", "0")
+                        .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ_]+)", "group", "0")
+                        .addTokenFilter("stop", "words", stopWordsFile)
+                        .addTokenFilter("lowercase")
+                        .build();
+        return analyzer;
+    }
+
+    private static Analyzer getTitleAnalyzer (String stopWordsFile) throws IOException {
+        Analyzer analyzer;
+        analyzer =
+                CustomAnalyzer.builder()
+                        .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ_]+)", "group", "0")
                         .addTokenFilter("lowercase")
                         .addTokenFilter("ASCIIFolding")
                         .build();
         return analyzer;
     }
 
-    public static void testAnalyzer (String sample, String stopWordsFile, boolean useStemmer) throws IOException {
-        Analyzer analyzer = getSpanishAnalyzer(stopWordsFile, useStemmer);
+    public static void testAnalyzer (String sample, String stopWordsFile) throws IOException {
+        Analyzer analyzer = getTitleAnalyzer(stopWordsFile);
         List<String> result = new ArrayList<>();
         try {
             TokenStream stream  = analyzer.tokenStream(null, new StringReader(sample));

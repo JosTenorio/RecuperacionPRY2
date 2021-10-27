@@ -61,7 +61,7 @@ public class QueryHandler {
             // Stopword load
             CollectionHandler.setAnalyzerWrapper("Stopwords/Stopwords.txt", true);
             // Custom analyzer setup
-            QueryParser parser = new QueryParser("titulo", CollectionHandler.getAnalyzerWrapper());
+            QueryParser parser = new QueryParser("texto", CollectionHandler.getAnalyzerWrapper());
             Query queryObject = parser.parse(query);
             // We obtain number of hits to optimize memory usage by creating an optimal array
             long hits = searcher.search(queryObject,1).totalHits.value;
