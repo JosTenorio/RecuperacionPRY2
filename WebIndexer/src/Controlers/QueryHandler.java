@@ -128,7 +128,7 @@ public class QueryHandler {
                     }
                 }
                 last20Docs.clear();
-                //clearScreen();
+                clearScreen();
                 System.out.println("-------- Resultados --------");
             }
             doc = searcher.doc(result[i-1].doc);
