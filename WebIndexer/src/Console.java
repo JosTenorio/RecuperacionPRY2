@@ -57,6 +57,14 @@ public class Console {
     }
 
     private static void queryIndex() {
-        System.out.println("Indizar colección");
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("->Consultas en colección \n");
+        System.out.println("Por favor ingrese la dirección del índice a utilizar \n");
+        System.out.flush();
+        String indexPath = scanner.nextLine();
+        System.out.println("Por favor ingrese la consulta a realizar");
+        String query = scanner.nextLine();
+        QueryHandler.searchQuery(query,indexPath);
+
     }
 }

@@ -38,6 +38,9 @@ public class CollectionHandler {
     public static void setAnalyzerWrapper (String stopwords, boolean wipe) throws IOException {
         analyzerWrapper = createWrapper(stopwords);
     }
+    public static Analyzer getAnalyzerWrapper(){
+        return analyzerWrapper;
+    }
 
     private static void createIndex (String indexPath) throws IOException {
         dir = FSDirectory.open(Paths.get(indexPath));
@@ -76,6 +79,7 @@ public class CollectionHandler {
 
     private static void addDoc(IndexWriter w, ParsedDocument parsedDoc, BigInteger docBeginning, BigInteger docEnd) throws IOException {
         Document doc = new Document();
+        System.out.println(parsedDoc.headers);
         doc.add(new TextField("texto", parsedDoc.text, Field.Store.YES));
         doc.add(new TextField("ref", parsedDoc.ref, Field.Store.YES));
         doc.add(new TextField("encab", parsedDoc.headers, Field.Store.YES));
