@@ -1,26 +1,41 @@
 package Utils;
 
-import org.apache.lucene.analysis.CharArraySet;
+import org.apache.commons.io.FilenameUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.io.*;
+import java.nio.channels.FileChannel;
 
 public class StopWordsHandler {
 
-    public static CharArraySet loadStopwords (String filepath) {
-        Scanner s = null;
+    public static void loadStopwords(String sourceFile, String depositFile) throws IOException {
+        File inputSWFile = new File(sourceFile);
+        File SWDeposit = new File(depositFile);
+        if (inputSWFile.equals(SWDeposit)) {
+            System.out.println("El archivo de stopwords es el mismo.");
+            return;
+        }
+        if(!SWDeposit.exists()) {
+            SWDeposit.createNewFile();
+        }
+        FileChannel source = null;
+        FileChannel destination = null;
         try {
-            s = new Scanner(new File("filepath"));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            source = new FileInputStream(inputSWFile).getChannel();
+            destination = new FileOutputStream(SWDeposit).getChannel();
+            destination.transferFrom(source, 0, source.size());
         }
-        ArrayList<String> list = new ArrayList<String>();
-        while (s.hasNext()){
-            list.add(s.next());
+        finally {
+            if(source != null) {
+                source.close();
+            }
+            if(destination != null) {
+                destination.close();
+            }
         }
-        s.close();
-        return new CharArraySet (list, true );
+    }
+
+    private static boolean validateStopwords (String stopWordsPath) {
+        File f = new File(stopWordsPath);
+        return (f.exists() && !f.isDirectory() && FilenameUtils.getExtension(stopWordsPath).equals("txt"));
     }
 }

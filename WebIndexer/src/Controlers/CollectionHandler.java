@@ -1,9 +1,6 @@
 package Controlers;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -66,6 +63,8 @@ public class CollectionHandler {
         writer = new IndexWriter(dir, config);
     }
 
+
+
     public static int primeCollection (String stopwordsPath, String collectionPath, String indexPath, boolean useStemmer,
                                        boolean recreateIndex)
     {
@@ -78,7 +77,7 @@ public class CollectionHandler {
         try {
             setAnalyzerWrapper(stopwordsPath, useStemmer);
             setAndOpenWriter(recreateIndex);
-            //saveIndexConfig(collectionPath, useStemmer,indexPath);
+            saveIndexConfig(collectionPath, useStemmer,indexPath);
         } catch (IOException e) {
            System.out.println("\n No se ha podido procesar el archivo de stopwords dado o el directorio de destino.");
             e.printStackTrace();
@@ -89,9 +88,9 @@ public class CollectionHandler {
 
     private static void saveIndexConfig (String collectionPath, boolean usesStemmer, String indexPath) throws IOException {
         BufferedWriter out;
-        FileWriter fstream = new FileWriter(indexPath.concat("\\CustomConfig.txt\n"), false);
+        FileWriter fstream = new FileWriter(indexPath.concat("\\CustomConfig.txt"), false);
         out = new BufferedWriter(fstream);
-        out.write(collectionPath);
+        out.write(collectionPath.concat("\n"));
         out.write(usesStemmer ? "true" : "false");
         out.close();
     }
