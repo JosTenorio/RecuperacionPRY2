@@ -3,7 +3,6 @@ package Controlers;
 import Models.ParsedDocument;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
-import org.apache.lucene.store.Directory;
 
 
 import java.io.File;
@@ -30,7 +29,7 @@ public class CollectionParser {
             System.out.println("\n No se ha podido abrir la colección indicada o esta no existe.");
             return;
         }
-        if (CollectionHandler.primeCollection(stopwordsPath, indexPath, useStemmer, true ) < 0) {
+        if (CollectionHandler.primeCollection(stopwordsPath, collectionPath ,indexPath, useStemmer, true) < 0) {
             return;
         }
         try( LineIterator lineIterator = FileUtils.lineIterator(collection,"UTF-8"))
@@ -42,7 +41,7 @@ public class CollectionParser {
             Pattern pathEndHtml = Pattern.compile("</html.*?>");
             Pattern patHtml = Pattern.compile("<html.*?>");
             Pattern patDoctype = Pattern.compile(".*?<!DOCTYPE.*?>");
-            BigInteger documentStart = BigInteger.valueOf((Integer) 0);
+            BigInteger documentStart = BigInteger.valueOf( 0);
             while(lineIterator.hasNext())
             {
                 String currentLine = lineIterator.nextLine();
@@ -67,7 +66,7 @@ public class CollectionParser {
                             return;
                         }
                         currentLine = lineIterator.nextLine();
-                        documentSource+=currentLine;
+                        documentSource += currentLine;
                         linebytesize =  BigInteger.valueOf((Integer)(currentLine.getBytes(StandardCharsets.UTF_8).length));
                         byteCount = byteCount.add(linebytesize);
                     }
@@ -85,7 +84,6 @@ public class CollectionParser {
         } catch (IOException e)
         {
             System.out.println("\n Error en la lectura del archivo fuente durante la indexación");
-            return;
         }
     }
 }
