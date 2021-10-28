@@ -59,7 +59,7 @@ public class QueryHandler {
             }
             IndexSearcher searcher = new IndexSearcher(reader);
             // Stopword load
-            CollectionHandler.setAnalyzerWrapper("Stopwords/Stopwords.txt", true);
+            CollectionHandler.setAnalyzerWrapper(CollectionParser.stopwordsDeposit, false);
             // Custom analyzer setup
             QueryParser parser = new QueryParser("texto", CollectionHandler.getAnalyzerWrapper());
             Query queryObject = parser.parse(query);
@@ -139,7 +139,7 @@ public class QueryHandler {
         if(result.length<20){
             while(true) {
                 clearScreen();
-                System.out.println("-----Menú de opciones-----\n1 --> Obtener el documento de un resultado\n2 --> Obtener los enlaces de un documento\n3 ");
+                System.out.println("-----Menú de opciones-----\n1. Obtener el documento de un resultado\n2. Obtener los enlaces de un documento\n3. Terminar consulta");
                 option = scanner.nextLine();
                 switch (option) {
                     // Selects document to show
@@ -157,9 +157,11 @@ public class QueryHandler {
                     // Gets links of a document
                     case "2" -> {
                         }
-                    default -> {
-                        System.out.println("Terminando consulta");
+                    case "3" -> {
+                        System.out.println("Consulta finalizada\n");
                         return;
+                    }
+                    default -> {
                     }
                 }
             }

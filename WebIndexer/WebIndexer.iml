@@ -45,23 +45,5 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="commons-io-2.11.0" level="project" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libraries/Solr/solr-8.10.1/solr-8.10.1/dist/solr-analysis-extras-8.10.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/libraries/Solr/solr-8.10.1/solr-8.10.1/dist/solr-analytics-8.10.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
   </component>
 </module>

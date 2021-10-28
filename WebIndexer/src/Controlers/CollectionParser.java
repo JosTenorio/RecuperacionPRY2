@@ -26,13 +26,13 @@ public class CollectionParser {
         if (collection == null) {
             return;
         }
-        if (CollectionHandler.primeCollection(stopwordsDeposit, collectionPath, indexPath, useStemmer, true) < 0) {
-            return;
-        }
         try {
             StopWordsHandler.loadStopwords(stopwordsPath, stopwordsDeposit);
         } catch (IOException e) {
-            System.out.println("No ha sido posible cargar el archivo de stopwords");
+            e.printStackTrace();
+            return;
+        }
+        if (CollectionHandler.primeCollection(stopwordsDeposit, collectionPath, indexPath, useStemmer, true) < 0) {
             return;
         }
         try( LineIterator lineIterator = FileUtils.lineIterator(collection,"UTF-8"))
@@ -80,9 +80,17 @@ public class CollectionParser {
                 }
             }
             CollectionHandler.closeWriter();
+            try {
+                StopWordsHandler.saveStopwords(stopwordsDeposit, indexPath);
+            } catch (IOException e) {
+                System.out.println("\n No se ha podido guardar las stopwords usadas en el índice creado");
+                return;
+
+            }
         } catch (IOException e)
         {
             System.out.println("\n Error en la lectura del archivo fuente durante la indexación");
+            return;
         }
     }
 

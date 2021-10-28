@@ -63,8 +63,6 @@ public class CollectionHandler {
         writer = new IndexWriter(dir, config);
     }
 
-
-
     public static int primeCollection (String stopwordsPath, String collectionPath, String indexPath, boolean useStemmer,
                                        boolean recreateIndex)
     {
@@ -80,8 +78,8 @@ public class CollectionHandler {
             saveIndexConfig(collectionPath, useStemmer,indexPath);
         } catch (IOException e) {
            System.out.println("\n No se ha podido procesar el archivo de stopwords dado o el directorio de destino.");
-            e.printStackTrace();
-            return -1;
+           e.printStackTrace();
+           return -1;
         }
         return 0;
     }

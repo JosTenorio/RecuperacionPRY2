@@ -1,6 +1,8 @@
+import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import Controlers.*;
+import Utils.StopWordsHandler;
 
 public class Console {
 
@@ -67,7 +69,7 @@ public class Console {
 
     private static void queryIndex() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("->Consultas en colección:  ");
+        System.out.println("->Consultas en colección:  \n");
         System.out.println("Por favor ingrese la dirección del índice a utilizar:  ");
         System.out.flush();
         String indexPath = scanner.nextLine();
