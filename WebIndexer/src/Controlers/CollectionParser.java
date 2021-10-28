@@ -1,6 +1,7 @@
 package Controlers;
 
 import Models.ParsedDocument;
+import Utils.StopWordsHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.lucene.store.Directory;
@@ -51,7 +52,7 @@ public class CollectionParser {
             Pattern patHtml = Pattern.compile("<html.*?>");
             Pattern patDoctype = Pattern.compile(".*?<!DOCTYPE.*?>");
             BigInteger documentStart = BigInteger.valueOf((Integer) 0);
-            while(lineIterator.hasNext())
+            for(String currentLine="";currentLine!=null;currentLine=randomAccessFile.readLine())
             {
 
                 BigInteger linebytesize =  BigInteger.valueOf((Integer)(currentLine.getBytes(StandardCharsets.UTF_8).length));
