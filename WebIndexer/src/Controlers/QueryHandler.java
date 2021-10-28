@@ -57,7 +57,15 @@ public class QueryHandler {
             }
             IndexSearcher searcher = new IndexSearcher(reader);
             // Stopword load
-            CollectionHandler.setAnalyzerWrapper(CollectionParser.stopwordsDeposit, false);
+            /*
+            try {
+                StopWordsHandler.loadStopwords(stopwordsPath, CollectionParser.stopwordsDeposit);
+            } catch (IOException e) {
+                e.printStackTrace();
+            return;
+            }
+            */
+            CollectionHandler.setAnalyzerWrapper(CollectionParser.stopwordsDeposit, true);
             // Custom analyzer setup
             QueryParser parser = new QueryParser("texto", CollectionHandler.getAnalyzerWrapper());
             Query queryObject = parser.parse(query);
