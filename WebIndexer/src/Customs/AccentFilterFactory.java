@@ -1,14 +1,12 @@
 package Customs;
 
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.util.TokenFilterFactory;
-
+import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
 import java.util.Map;
 
+public class AccentFilterFactory extends LowerCaseFilterFactory {
 
-public class AccentFilterFactory extends TokenFilterFactory {
-
-    protected AccentFilterFactory(Map<String, String> args) {
+    public AccentFilterFactory(Map<String, String> args) {
         super(args);
     }
 

@@ -1,7 +1,6 @@
 package Controlers;
 
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import Customs.AccentFilterFactory;
-import Customs.TitleAnalyzer;
 import Models.ParsedDocument;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -65,7 +63,11 @@ public class CollectionHandler {
         writer = new IndexWriter(dir, config);
     }
 
-    public static int primeCollection (String stopwordsPath, String indexPath, boolean useStemmer, boolean recreateIndex) {
+
+
+    public static int primeCollection (String stopwordsPath, String collectionPath, String indexPath, boolean useStemmer,
+                                       boolean recreateIndex)
+    {
         try {
             createIndex(indexPath);
         } catch (IOException e) {
@@ -75,11 +77,22 @@ public class CollectionHandler {
         try {
             setAnalyzerWrapper(stopwordsPath, useStemmer);
             setAndOpenWriter(recreateIndex);
+            saveIndexConfig(collectionPath, useStemmer,indexPath);
         } catch (IOException e) {
-            System.out.println("\n No se ha podido procesar el archivo de stopwords dado, o ha fallado el analizador.");
+           System.out.println("\n No se ha podido procesar el archivo de stopwords dado o el directorio de destino.");
+            e.printStackTrace();
             return -1;
         }
         return 0;
+    }
+
+    private static void saveIndexConfig (String collectionPath, boolean usesStemmer, String indexPath) throws IOException {
+        BufferedWriter out;
+        FileWriter fstream = new FileWriter(indexPath.concat("\\CustomConfig.txt"), false);
+        out = new BufferedWriter(fstream);
+        out.write(collectionPath.concat("\n"));
+        out.write(usesStemmer ? "true" : "false");
+        out.close();
     }
 
     public static int insertDocument(ParsedDocument document, BigInteger docBeginning, BigInteger docEnd){
@@ -112,47 +125,48 @@ public class CollectionHandler {
     private static PerFieldAnalyzerWrapper createWrapper (String stopWordsFile, boolean useStemmer) throws IOException {
         Map<String, Analyzer> analyzerMap = new HashMap<>();
         analyzerMap.put("texto", getBodyAnalyzer(stopWordsFile, useStemmer));
-        analyzerMap.put("ref", new TitleAnalyzer());
+        analyzerMap.put("ref", getTitleAnalyzer(stopWordsFile));
         analyzerMap.put("encab", getBodyAnalyzer(stopWordsFile, useStemmer));
-        analyzerMap.put("titulo", new TitleAnalyzer());
+        analyzerMap.put("titulo", getTitleAnalyzer(stopWordsFile));
         return new PerFieldAnalyzerWrapper(new StandardAnalyzer(), analyzerMap);
     }
 
     private static Analyzer getBodyAnalyzer (String stopWordsFile, boolean useStemmer) throws IOException {
+        Map<String, String> accentFilterParams = new HashMap<>();
         Analyzer analyzer;
         analyzer = useStemmer ?
                 CustomAnalyzer.builder()
                         .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ_]+)", "group", "0")
-                        .addTokenFilter(SnowballPorterFilterFactory.class, "language", "Spanish")
-                        .addTokenFilter("stop", "words", stopWordsFile)
                         .addTokenFilter("lowercase")
+                        .addTokenFilter("stop", "words", stopWordsFile)
+                        .addTokenFilter(SnowballPorterFilterFactory.class, "language", "Spanish")
                         .build()
                 :
                 CustomAnalyzer.builder()
                         .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ_]+)", "group", "0")
-                        .addTokenFilter("stop", "words", stopWordsFile)
                         .addTokenFilter("lowercase")
+                        .addTokenFilter("stop", "words", stopWordsFile)
+                        .addTokenFilter(AccentFilterFactory.class, accentFilterParams)
                         .build();
         return analyzer;
     }
 
 
     private static Analyzer getTitleAnalyzer (String stopWordsFile) throws IOException {
-        Map<String, String> articleMapOne = new HashMap<>();
-        articleMapOne.put("words", "stopWordsFile");
+        Map<String, String> accentFilterParams = new HashMap<>();
         Analyzer analyzer;
         analyzer =
                 CustomAnalyzer.builder()
                         .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ_]+)", "group", "0")
-                        .addTokenFilter(SnowballPorterFilterFactory.class, "language", "Spanish")
                         .addTokenFilter("lowercase")
-                        .addTokenFilter(AccentFilterFactory.class, articleMapOne)
+                        .addTokenFilter(AccentFilterFactory.class, accentFilterParams)
+                        .addTokenFilter("stop", "words", stopWordsFile)
                         .build();
         return analyzer;
     }
 
     public static void testAnalyzer (String sample, String stopWordsFile) throws IOException {
-        Analyzer analyzer = getTitleAnalyzer(stopWordsFile);
+        Analyzer analyzer = getBodyAnalyzer(stopWordsFile, true);
         List<String> result = new ArrayList<>();
         try {
             TokenStream stream  = analyzer.tokenStream(null, new StringReader(sample));

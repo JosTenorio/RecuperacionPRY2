@@ -20,7 +20,6 @@ public final class AccentFilter extends TokenFilter {
         if (!input.incrementToken()) {
             return false;
         }
-
         int length = charTermAttr.length();
         char[] buffer = charTermAttr.buffer();
         char[] newBuffer = new char[length];
