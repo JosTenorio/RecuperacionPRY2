@@ -136,8 +136,7 @@ public class QueryHandler {
         // Menu in case of less than 20 documents
         if(result.length<20){
             while(true) {
-                clearScreen();
-                System.out.println("-----Menú de opciones-----\n1 --> Obtener el documento de un resultado\n2 --> Obtener los enlaces de un documento\n3 ");
+                System.out.println("-----Menú de opciones-----\n1 --> Obtener el documento de un resultado\n2 --> Obtener los enlaces de un documento\n3 Salir\n ");
                 option = scanner.nextLine();
                 switch (option) {
                     // Selects document to show
