@@ -8,13 +8,11 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -138,8 +136,7 @@ public class QueryHandler {
         // Menu in case of less than 20 documents
         if(result.length<20){
             while(true) {
-                clearScreen();
-                System.out.println("-----Menú de opciones-----\n1. Obtener el documento de un resultado\n2. Obtener los enlaces de un documento\n3. Terminar consulta");
+                System.out.println("-----Menú de opciones-----\n1 --> Obtener el documento de un resultado\n2 --> Obtener los enlaces de un documento\n3 Salir\n ");
                 option = scanner.nextLine();
                 switch (option) {
                     // Selects document to show
@@ -183,7 +180,7 @@ public class QueryHandler {
         try{
             int docId = Integer.parseInt(doc);
             // If not in range throws an error catched below
-            if(docId>-1 && docId<20){
+            if(docId>-1 && docId<docs.size()){
                 return docs.get(docId);
             }
             else {
