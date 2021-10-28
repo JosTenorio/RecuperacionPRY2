@@ -1,9 +1,10 @@
 import java.io.IOException;
 import Controlers.CollectionHandler;
+import Controlers.CollectionParser;
 
 public class main {
     public static void main(String[] args) throws IOException {
-        //Console.showMainMenu();
-        CollectionHandler.testAnalyzer("La tarea consiste en programar una niña aplicación que permita indexar y buscar una colección de páginas web. Se debe usar la biblioteca ", "Stopwords\\Stopwords.txt");
+        Console.showMainMenu();
+        //CollectionParser.indexCollection("D:\\Universidad\\Colecciones\\h8.txt","stopwords/stopwords.txt","a",true);
     }
 }

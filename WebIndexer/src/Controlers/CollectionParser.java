@@ -44,9 +44,10 @@ public class CollectionParser {
             BigInteger documentStart = BigInteger.valueOf((Integer) 0);
             while(lineIterator.hasNext())
             {
+
                 String currentLine = lineIterator.nextLine();
                 BigInteger linebytesize =  BigInteger.valueOf((Integer)(currentLine.getBytes(StandardCharsets.UTF_8).length));
-                byteCount = byteCount.add(linebytesize);
+                byteCount = byteCount.add(linebytesize.add(BigInteger.valueOf(1)));
                 if(patDoctype.matcher(currentLine).matches())
                 {
                     // If we find a possible html start point we save that byte count to index later
@@ -68,11 +69,10 @@ public class CollectionParser {
                         currentLine = lineIterator.nextLine();
                         documentSource+=currentLine;
                         linebytesize =  BigInteger.valueOf((Integer)(currentLine.getBytes(StandardCharsets.UTF_8).length));
-                        byteCount = byteCount.add(linebytesize);
+                        byteCount = byteCount.add(linebytesize.add(BigInteger.valueOf(1)));
                     }
                     //End of the doc
                     BigInteger documentEnd = byteCount;
-
                     ParsedDocument parsedDoc = HTMLHandler.parseHTML(documentSource);
                     if (CollectionHandler.insertDocument(parsedDoc, documentStart, documentEnd ) < 0) {
                         return;
@@ -87,4 +87,5 @@ public class CollectionParser {
             return;
         }
     }
+
 }
