@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import Customs.AccentFilterFactory;
+import Customs.TitleAnalyzer;
 import Models.ParsedDocument;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -110,9 +112,9 @@ public class CollectionHandler {
     private static PerFieldAnalyzerWrapper createWrapper (String stopWordsFile, boolean useStemmer) throws IOException {
         Map<String, Analyzer> analyzerMap = new HashMap<>();
         analyzerMap.put("texto", getBodyAnalyzer(stopWordsFile, useStemmer));
-        analyzerMap.put("ref", getTitleAnalyzer(stopWordsFile));
+        analyzerMap.put("ref", new TitleAnalyzer());
         analyzerMap.put("encab", getBodyAnalyzer(stopWordsFile, useStemmer));
-        analyzerMap.put("titulo", getTitleAnalyzer(stopWordsFile));
+        analyzerMap.put("titulo", new TitleAnalyzer());
         return new PerFieldAnalyzerWrapper(new StandardAnalyzer(), analyzerMap);
     }
 
@@ -134,13 +136,17 @@ public class CollectionHandler {
         return analyzer;
     }
 
+
     private static Analyzer getTitleAnalyzer (String stopWordsFile) throws IOException {
+        Map<String, String> articleMapOne = new HashMap<>();
+        articleMapOne.put("words", "stopWordsFile");
         Analyzer analyzer;
         analyzer =
                 CustomAnalyzer.builder()
                         .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ_]+)", "group", "0")
+                        .addTokenFilter(SnowballPorterFilterFactory.class, "language", "Spanish")
                         .addTokenFilter("lowercase")
-                        .addTokenFilter("ASCIIFolding")
+                        .addTokenFilter(AccentFilterFactory.class, articleMapOne)
                         .build();
         return analyzer;
     }
