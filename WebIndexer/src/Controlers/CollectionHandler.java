@@ -114,7 +114,11 @@ public class CollectionHandler {
         doc.add(new TextField("ref", parsedDoc.ref, Field.Store.YES));
         doc.add(new TextField("encab", parsedDoc.headers, Field.Store.YES));
         doc.add(new TextField("titulo", parsedDoc.title, Field.Store.YES));
-       // doc.add(new StringField("enlace",parsedDoc.enlace.toString(), Field.Store.YES));
+        int i = 0;
+        for (String link : parsedDoc.enlace) {
+            doc.add(new StringField("enlace".concat(Integer.toString(i)), link, Field.Store.YES));
+            i++;
+        }
         doc.add(new StringField("beginningByte", docBeginning.toString(), Field.Store.YES));
         doc.add(new StringField("endByte", docEnd.toString(), Field.Store.YES));
         w.addDocument(doc);
