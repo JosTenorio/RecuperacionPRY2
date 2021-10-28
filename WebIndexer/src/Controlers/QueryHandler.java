@@ -10,9 +10,12 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -157,7 +160,7 @@ public class QueryHandler {
                         // Opens the selected document in browser
                         //TODO: FIX HARDCODED COLLECTION FILE
                         openInBrowser(selectedDoc, "D:\\Universidad\\Colecciones\\h8.txt");
-                        scanner.nextLine();
+
                     }
                     // Gets links of a document
                     case "2" -> {
@@ -205,6 +208,7 @@ public class QueryHandler {
         return null;
     }
     public static void openInBrowser(Document doc,String collection) throws IOException {
+        Scanner scanner = new Scanner(System.in);
         int beginningByte = Integer.parseInt(doc.get("beginningByte"));
         int endByte = Integer.parseInt(doc.get("endByte"));
         FileInputStream fis = new FileInputStream(collection);
@@ -214,6 +218,14 @@ public class QueryHandler {
 
         byte[] readBytes = bytes.array();
         String htmlPage = new String(readBytes, StandardCharsets.UTF_8);
-        System.out.println(htmlPage);
+
+        File file = new File("temp.html");
+
+        FileWriter writer = new FileWriter(file);
+        writer.write(htmlPage);
+        writer.close();
+            Desktop.getDesktop().browse(file.toURI());
+
+
     }
 }

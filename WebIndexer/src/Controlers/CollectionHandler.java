@@ -93,7 +93,7 @@ public class CollectionHandler {
         out.close();
     }
 
-    public static int insertDocument(ParsedDocument document, BigInteger docBeginning, BigInteger docEnd){
+    public static int insertDocument(ParsedDocument document, Long docBeginning, Long docEnd){
         try {
             if (writer.isOpen()){
                 addDoc(writer, document, docBeginning, docEnd);
@@ -108,7 +108,7 @@ public class CollectionHandler {
         return 1;
     }
 
-    private static void addDoc(IndexWriter w, ParsedDocument parsedDoc, BigInteger docBeginning, BigInteger docEnd) throws IOException {
+    private static void addDoc(IndexWriter w, ParsedDocument parsedDoc, Long docBeginning, Long docEnd) throws IOException {
         Document doc = new Document();
         doc.add(new TextField("texto", parsedDoc.text, Field.Store.YES));
         doc.add(new TextField("ref", parsedDoc.ref, Field.Store.YES));

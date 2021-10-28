@@ -44,6 +44,14 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="commons-io-2.11.0" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libraries/Apache/commons-io-2.11.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
