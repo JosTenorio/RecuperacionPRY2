@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 
 public class HTMLHandler {
+    private static final Pattern beginningRef = Pattern.compile("^\\.\\.\\/\\.\\.\\/\\.\\.\\/\\.\\.\\/articles\\/");
 
     public static ParsedDocument parseHTML (String source) {
         org.jsoup.nodes.Document document = Jsoup.parse(source);
@@ -51,7 +52,6 @@ public class HTMLHandler {
     public static ArrayList<String> parseLink (org.jsoup.nodes.Document document) {
         ArrayList<String> result = new ArrayList<>();
         Elements aTag = document.select("a");
-        Pattern beginningRef = Pattern.compile("^\\.\\.\\/\\.\\.\\/\\.\\.\\/\\.\\.\\/articles\\/");
         for (Element tag : aTag) {
             String link = tag.attr("href");
             Matcher matcher = beginningRef.matcher(link);
