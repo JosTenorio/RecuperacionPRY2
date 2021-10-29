@@ -52,7 +52,7 @@ public class Console {
         System.out.print("Favor ingresar la dirección del archivo de stopwords a usar: ");
         System.out.flush();
         String stopwordsPath = scanner.nextLine();
-        System.out.print("Favor ingresar la dirección del archivo en el cuál se almacenara el índice creado: ");
+        System.out.print("Favor ingresar la dirección del directorio en el cuál se almacenara el índice creado: ");
         System.out.flush();
         String indexPath = scanner.nextLine();
         System.out.print("Se debe aplicar stemming durante la indixación? (Y/N): ");

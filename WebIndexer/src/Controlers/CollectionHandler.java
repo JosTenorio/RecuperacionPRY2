@@ -2,6 +2,7 @@ package Controlers;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,12 +28,23 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
 
-
 public class CollectionHandler {
 
     private static Analyzer analyzerWrapper;
     private static Directory dir;
     private static IndexWriter writer;
+    private static final Document doc = createDocument ();
+
+    private static Document createDocument () {
+        Document doc = new Document();
+        doc.add(new TextField("texto", "", Field.Store.YES));
+        doc.add(new TextField("ref", "", Field.Store.YES));
+        doc.add(new TextField("encab", "", Field.Store.YES));
+        doc.add(new TextField("titulo", "", Field.Store.YES));
+        doc.add(new StringField("beginningByte","", Field.Store.YES));
+        doc.add(new StringField("endByte", "", Field.Store.YES));
+        return doc;
+    }
 
     public static void setAnalyzerWrapper (String stopwords, boolean useStemmer) throws IOException {
         analyzerWrapper = createWrapper(stopwords, useStemmer);
@@ -43,6 +55,9 @@ public class CollectionHandler {
     }
 
     private static void createIndex (String indexPath) throws IOException {
+        if (!Files.exists(Paths.get(indexPath)) || !Files.isDirectory(Paths.get(indexPath))) {
+            throw new IOException();
+        }
         dir = FSDirectory.open(Paths.get(indexPath));
     }
 
@@ -60,6 +75,8 @@ public class CollectionHandler {
         else {
             config.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
         }
+        config.setRAMBufferSizeMB(48);
+        config.setUseCompoundFile(false);
         writer = new IndexWriter(dir, config);
     }
 
@@ -109,18 +126,29 @@ public class CollectionHandler {
     }
 
     private static void addDoc(IndexWriter w, ParsedDocument parsedDoc, BigInteger docBeginning, BigInteger docEnd) throws IOException {
-        Document doc = new Document();
-        doc.add(new TextField("texto", parsedDoc.text, Field.Store.YES));
-        doc.add(new TextField("ref", parsedDoc.ref, Field.Store.YES));
-        doc.add(new TextField("encab", parsedDoc.headers, Field.Store.YES));
-        doc.add(new TextField("titulo", parsedDoc.title, Field.Store.YES));
-        int i = 0;
-        for (String link : parsedDoc.enlace) {
-            doc.add(new StringField("enlace".concat(Integer.toString(i)), link, Field.Store.YES));
+        ((TextField) doc.getField("texto")).setStringValue(parsedDoc.text);
+        ((TextField) doc.getField("ref")).setStringValue(parsedDoc.ref);
+        ((TextField) doc.getField("encab")).setStringValue(parsedDoc.headers);
+        ((TextField) doc.getField("titulo")).setStringValue(parsedDoc.title);
+        ((StringField) doc.getField("beginningByte")).setStringValue(docBeginning.toString());
+        ((StringField) doc.getField("endByte")).setStringValue(docEnd.toString());
+        int i = 1;
+        int maxLink = parsedDoc.enlace.size();
+        String linkFieldName = "enlace".concat(Integer.toString(i));
+        while (doc.getField(linkFieldName) != null) {
+            if (i <= maxLink) {
+                ((StringField) doc.getField(linkFieldName)).setStringValue(parsedDoc.enlace.get(i - 1));
+            } else {
+                doc.removeField(linkFieldName);
+            }
+            i++;
+            linkFieldName = "enlace".concat(Integer.toString(i));
+        }
+        while (i <= maxLink) {
+            doc.add(new StringField(linkFieldName, parsedDoc.enlace.get(i - 1), Field.Store.YES));
+            linkFieldName = "enlace".concat(Integer.toString(i));
             i++;
         }
-        doc.add(new StringField("beginningByte", docBeginning.toString(), Field.Store.YES));
-        doc.add(new StringField("endByte", docEnd.toString(), Field.Store.YES));
         w.addDocument(doc);
     }
 
