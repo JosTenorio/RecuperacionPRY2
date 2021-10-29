@@ -1,5 +1,6 @@
 package Controlers;
 
+import Utils.StopWordsHandler;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -17,6 +18,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 
@@ -47,6 +49,23 @@ public class QueryHandler {
             return null;
         }
     }
+
+    public static ArrayList<String> getIndexInfo(String indexpath) throws IOException {
+
+        FileInputStream myInputStream  = new FileInputStream(indexpath);
+        InputStreamReader myInputStreamReader = new InputStreamReader(myInputStream);
+        BufferedReader myBufferedReader    = new BufferedReader(myInputStreamReader);
+        ArrayList <String> result = new ArrayList<String>();
+
+        String line ="";
+        while(line!=null){
+            line = myBufferedReader.readLine();
+            System.out.println(line);
+            result.add(line);
+        }
+    return result;
+
+    }
     // Searches a given query in the specified index
     public static void searchQuery(String query,String indexPath)  {
         try {
@@ -57,15 +76,17 @@ public class QueryHandler {
             }
             IndexSearcher searcher = new IndexSearcher(reader);
             // Stopword load
-            /*
+
             try {
-                StopWordsHandler.loadStopwords(stopwordsPath, CollectionParser.stopwordsDeposit);
+                StopWordsHandler.loadStopwords(indexPath.concat("\\Stopwords.txt"), CollectionParser.stopwordsDeposit);
             } catch (IOException e) {
                 e.printStackTrace();
             return;
             }
-            */
-            CollectionHandler.setAnalyzerWrapper(CollectionParser.stopwordsDeposit, true);
+            ArrayList<String> indexConfig =getIndexInfo(indexPath.concat("\\CustomConfig.txt"));
+
+
+            CollectionHandler.setAnalyzerWrapper(CollectionParser.stopwordsDeposit, Boolean.parseBoolean(indexConfig.get(1)));
             // Custom analyzer setup
             QueryParser parser = new QueryParser("texto", CollectionHandler.getAnalyzerWrapper());
             Query queryObject = parser.parse(query);
@@ -75,7 +96,7 @@ public class QueryHandler {
                 System.out.println("No se encontraron coincidencias");
                 return;
             }
-            showResults(searcher.search(queryObject, (int) hits).scoreDocs,searcher);
+            showResults(searcher.search(queryObject, (int) hits).scoreDocs,searcher,indexConfig.get(0));
         }
         catch (ParseException exception){
             System.out.println("Error en el parseo de la consulta");
@@ -84,11 +105,11 @@ public class QueryHandler {
             System.out.println("Error al momento de cargar el índice");
         }
     }
-    private static void showResults(ScoreDoc[] result,IndexSearcher searcher) throws IOException {
+    private static void showResults(ScoreDoc[] result,IndexSearcher searcher,String collectionPath) throws IOException {
         Scanner scanner = new Scanner(System.in);
         String option = null;
         clearScreen();
-        System.out.println("-------- Resultados --------");
+        System.out.println("Resultados\n---------------------------------------------------------");
         Document doc;
         // Arraylist containing the last 20 documents shown to the user
         ArrayList<Document> last20Docs = new ArrayList<Document>();
@@ -97,9 +118,9 @@ public class QueryHandler {
             if(i%20==0 && i!=0){
                 doc = searcher.doc(result[i-1].doc);
                 last20Docs.add(doc);
-                System.out.println("["+i+"]"+"Título del documento:  "+doc.get("titulo"));
-                System.out.println("-----Menú de opciones-----\n1 --> Ver los siguiente 20 resultados\n2 --> Ver los anteriores 20 resultados\n3 " +
-                        "--> Obtener el documento de un resultado\n4 --> Obtener los enlaces de un documento\nPara salir presiona cualquier otra tecla");
+                System.out.println("["+i+"] "+"Título del documento:  "+doc.get("titulo"));
+                System.out.println("---------------------------------------------------------\nMenú de opciones\n1. Ver los siguiente 20 resultados\n2. Ver los anteriores 20 resultados\n3" +
+                        ". Obtener el documento de un resultado\n4. Obtener los enlaces de un documento\nPara salir presiona cualquier otra tecla\n---------------------------------------------------------");
                 System.out.flush();
                 option = scanner.nextLine();
                 switch (option) {
@@ -113,21 +134,16 @@ public class QueryHandler {
                     // Opens a given document in a web browser
                     case "3" ->{
                         clearScreen();
-                        Document selectedDoc = selectDoc(last20Docs);
-                        if(selectedDoc==null){
-                            System.out.println("Error al elegir el documento");
-                            return;
-                        }
-                        // Opens the selected document in browser
-                        //TODO: FIX HARDCODED COLLECTION FILE
-                        openInBrowser(selectedDoc,"D:\\Universidad\\Colecciones\\h8.txt");
-                        scanner.nextLine();
-                        // Set counters as they were before
+                        getDocumentHandler(last20Docs,collectionPath);
                         if(i==20){i=1;}
                         else {i-=39;}
                     }
                     // Get all the links in a given document
-                    case "4" ->{}
+                    case "4" ->{
+                        getEnlacesHandler(last20Docs);
+                        if(i==20){i=1;}
+                        else {i-=39;}
+                    }
                     default -> {
                         System.out.println("Terminando consulta");
                         return;
@@ -135,7 +151,7 @@ public class QueryHandler {
                 }
                 last20Docs.clear();
                 clearScreen();
-                System.out.println("-------- Resultados --------");
+                System.out.println("Resultados\n---------------------------------------------------------");
             }
             doc = searcher.doc(result[i-1].doc);
             last20Docs.add(doc);
@@ -149,18 +165,11 @@ public class QueryHandler {
                 switch (option) {
                     // Selects document to show
                     case "1" -> {
-                        Document selectedDoc = selectDoc(last20Docs);
-                        if (selectedDoc == null) {
-                            System.out.println("Error al elegir el do cumento");
-                            return;
-                        }
-                        // Opens the selected document in browser
-                        //TODO: FIX HARDCODED COLLECTION FILE
-                        openInBrowser(selectedDoc, "D:\\Universidad\\Colecciones\\h8.txt");
-
+                        getDocumentHandler(last20Docs,collectionPath);
                     }
                     // Gets links of a document
                     case "2" -> {
+                        getEnlacesHandler(last20Docs);
                         }
                     case "3" -> {
                         System.out.println("Consulta finalizada\n");
@@ -177,6 +186,35 @@ public class QueryHandler {
             System.out.println("\n");
         }
     }
+
+    public static void getDocumentHandler(ArrayList<Document> last20Docs,String collectionPath) throws IOException {
+        Document selectedDoc = selectDoc(last20Docs);
+        if (selectedDoc == null) {
+            System.out.println("Error al elegir el documento");
+            return;
+        }
+        // Opens the selected document in browser
+        openInBrowser(selectedDoc, collectionPath);
+    }
+    public static void getEnlacesHandler(ArrayList<Document> last20Docs){
+        Document selectedDoc = selectDoc(last20Docs);
+        if (selectedDoc == null) {
+            System.out.println("Error al elegir el do cumento");
+            return;
+        }
+        getEnlaces(selectedDoc);
+    }
+    public static void getEnlaces(Document doc){
+        String enlace;
+        for(int i=0;true;i++){
+            enlace = doc.get("enlace".concat(Integer.toString(i)));
+            if(enlace==null){
+                break;
+            }
+            System.out.println(enlace);
+        }
+    }
+
     public static Document selectDoc(ArrayList<Document> docs){
         Scanner scanner = new Scanner(System.in);
         System.out.println("Por favor seleccione mediante el número entre [ ] el documento que desea abrir");
@@ -212,6 +250,7 @@ public class QueryHandler {
         f.seek(beginningByte);
         byte[] data = new byte[endByte];
         f.readFully(data,0,endByte);
+        f.close();
 //        FileInputStream fis = new FileInputStream(collection);
 //        System.out.println(beginningByte+"asd"+endByte);
 //        ByteBuffer bytes = ByteBuffer.allocate(endByte-beginningByte);

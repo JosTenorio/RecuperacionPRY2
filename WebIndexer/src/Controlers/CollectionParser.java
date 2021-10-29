@@ -41,32 +41,33 @@ public class CollectionParser {
         try(RandomAccessFile randomAccessFile = new RandomAccessFile(collectionPath, "r");)
         {
 
-            BufferedReader myBufferedReader    = new BufferedReader(new FileReader(randomAccessFile.getFD()));
+            BufferedReader myBufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(randomAccessFile.getFD()), "ISO-8859-1"));
             String currentDocString = "";
             long currentOffset = 0;
             long previousOffset = -1;
             Long documentStart = 0L;
             for(String currentLine="";currentLine!=null;currentLine=myBufferedReader.readLine())
-            {
 
+            {
+                long fileOffset = randomAccessFile.getFilePointer();
+                if (fileOffset != previousOffset) {
+                    if (previousOffset != -1) {
+                        currentOffset = previousOffset;
+                    }
+                    previousOffset = fileOffset;
+                }
+                int bufferOffset = getOffset(myBufferedReader);
+                long realposition = currentOffset + bufferOffset;
                 if(patDoctype.matcher(currentLine).matches())
                 {
-                    // If we find a possible html start point we save that byte count to index later
-                    long fileOffset = randomAccessFile.getFilePointer();
-                    if (fileOffset != previousOffset) {
-                        if (previousOffset != -1) {
-                            currentOffset = previousOffset;
-                        }
-                        previousOffset = fileOffset;
-                    }
-                    int bufferOffset = getOffset(myBufferedReader);
-                    documentStart = currentOffset + bufferOffset;
-
+                    // If we find a possible html start point we save that byte count to index late
+                    documentStart=realposition;
 
                 }
                 else if(patHtml.matcher(currentLine).matches())
                 {
                     // If we find an opening html tag then we need to parse all the content into a single string to open the document in jsoup
+                    documentStart=realposition;
                     StringBuilder documentSource = new StringBuilder();
                     documentSource = new StringBuilder(documentSource.toString().concat(currentLine));
                     while(!pathEndHtml.matcher((currentLine)).matches())
@@ -79,14 +80,7 @@ public class CollectionParser {
                         documentSource.append(currentLine);
                     }
                     //End of the doc
-                    long fileOffset = randomAccessFile.getFilePointer();
-                    if (fileOffset != previousOffset) {
-                        if (previousOffset != -1) {
-                            currentOffset = previousOffset;
-                        }
-                        previousOffset = fileOffset;
-                    }
-                    int bufferOffset = getOffset(myBufferedReader);
+
                     long documentEnd = documentSource.toString().getBytes(StandardCharsets.UTF_8).length;
                     ParsedDocument parsedDoc = HTMLHandler.parseHTML(documentSource.toString());
 
