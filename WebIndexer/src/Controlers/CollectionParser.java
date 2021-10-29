@@ -8,6 +8,7 @@ import org.apache.lucene.store.Directory;
 
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
@@ -39,61 +40,43 @@ public class CollectionParser {
 
         try(RandomAccessFile randomAccessFile = new RandomAccessFile(collectionPath, "r");)
         {
-//            InputStreamReader myInputStreamReader = new InputStreamReader(myInputStream);
-//            BufferedReader myBufferedReader    = new BufferedReader(myInputStreamReader);
-            //FileChannel myFileChannel = myInputStream.getChannel();
+
+            BufferedReader myBufferedReader    = new BufferedReader(new FileReader(randomAccessFile.getFD()));
             String currentDocString = "";
-
-
-            //currentDocString += randomAccessFile.readLine();
-            int docCount = 0;
-            BigInteger byteCount = BigInteger.valueOf((Integer)(currentDocString.getBytes(StandardCharsets.UTF_8).length));
-            Pattern pathEndHtml = Pattern.compile("</html.*?>");
-            Pattern patHtml = Pattern.compile("<html.*?>");
-            Pattern patDoctype = Pattern.compile(".*?<!DOCTYPE.*?>");
-            Long documentStart = 0l;
-            for(String currentLine="";currentLine!=null;currentLine=randomAccessFile.readLine())
+            long currentOffset = 0;
+            long previousOffset = -1;
+            Long documentStart = 0L;
+            for(String currentLine="";currentLine!=null;currentLine=myBufferedReader.readLine())
             {
 
-                BigInteger linebytesize =  BigInteger.valueOf((Integer)(currentLine.getBytes(StandardCharsets.UTF_8).length));
-                //byteCount = byteCount.add(linebytesize.add(BigInteger.valueOf(1)));
                 if(patDoctype.matcher(currentLine).matches())
                 {
                     // If we find a possible html start point we save that byte count to index later
-//                    System.out.println(", Position : "+randomAccessFile.getFilePointer());
-//                    System.out.println(currentLine);
-                    documentStart = randomAccessFile.getFilePointer();
+                    documentStart = calcPosition(myBufferedReader,randomAccessFile,currentOffset,previousOffset);
+
                 }
                 else if(patHtml.matcher(currentLine).matches())
                 {
-
                     // If we find an opening html tag then we need to parse all the content into a single string to open the document in jsoup
-
                     StringBuilder documentSource = new StringBuilder();
                     documentSource = new StringBuilder(documentSource.toString().concat(currentLine));
                     while(!pathEndHtml.matcher((currentLine)).matches())
                     {
                         // Gets next line and adds it to the source string
-                        currentLine = randomAccessFile.readLine();
+                        currentLine = myBufferedReader.readLine();
                         if(currentLine==null){
                             return;
                         }
                         documentSource.append(currentLine);
-                        linebytesize =  BigInteger.valueOf((Integer)(currentLine.getBytes(StandardCharsets.UTF_8).length));
-                        byteCount = byteCount.add(linebytesize.add(BigInteger.valueOf(1)));
                     }
-                    //System.out.println(currentLine);
                     //End of the doc
-                    Long documentEnd = randomAccessFile.getFilePointer();;
-
+                    Long documentEnd = calcPosition(myBufferedReader,randomAccessFile,currentOffset,previousOffset);
                     ParsedDocument parsedDoc = HTMLHandler.parseHTML(documentSource.toString());
                     if (CollectionHandler.insertDocument(parsedDoc, documentStart, documentEnd ) < 0) {
                         return;
                     }
-                    docCount++;
                 }
             }
-            System.out.println(docCount);
             CollectionHandler.closeWriter();
             try {
                 StopWordsHandler.saveStopwords(stopwordsDeposit, indexPath);
@@ -106,9 +89,32 @@ public class CollectionParser {
         {   e.printStackTrace();
             System.out.println("\n Error en la lectura del archivo fuente durante la indexación");
             return;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
+    private static long calcPosition(BufferedReader bufferedReader,RandomAccessFile randomAccessFile,long currentOffset, long previousOffset) throws NoSuchFieldException, IllegalAccessException, IOException {
+        long fileOffset = randomAccessFile.getFilePointer();
+        if (fileOffset != previousOffset) {
+            if (previousOffset != -1) {
+                currentOffset = previousOffset;
+            }
+            previousOffset = fileOffset;
+        }
+        int bufferOffset = getOffset(bufferedReader);
+        long realPosition = currentOffset + bufferOffset;
+        return realPosition;
+    }
+    private static int getOffset(BufferedReader bufferedReader) throws NoSuchFieldException, IllegalAccessException {
+        Field field = BufferedReader.class.getDeclaredField("nextChar");
+        int result = 0;
+        try {
+            result = (Integer) field.get(bufferedReader);
+        } finally {
 
+        }
+        return result;
+    }
     public static File openCollection (String collectionPath) {
         File f = new File(collectionPath);
         if (f.exists() && !f.isDirectory()) {
