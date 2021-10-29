@@ -52,7 +52,16 @@ public class CollectionParser {
                 if(patDoctype.matcher(currentLine).matches())
                 {
                     // If we find a possible html start point we save that byte count to index later
-                    documentStart = calcPosition(myBufferedReader,randomAccessFile,currentOffset,previousOffset);
+                    long fileOffset = randomAccessFile.getFilePointer();
+                    if (fileOffset != previousOffset) {
+                        if (previousOffset != -1) {
+                            currentOffset = previousOffset;
+                        }
+                        previousOffset = fileOffset;
+                    }
+                    int bufferOffset = getOffset(myBufferedReader);
+                    documentStart = currentOffset + bufferOffset;
+
 
                 }
                 else if(patHtml.matcher(currentLine).matches())
@@ -70,8 +79,17 @@ public class CollectionParser {
                         documentSource.append(currentLine);
                     }
                     //End of the doc
-                    Long documentEnd = calcPosition(myBufferedReader,randomAccessFile,currentOffset,previousOffset);
+                    long fileOffset = randomAccessFile.getFilePointer();
+                    if (fileOffset != previousOffset) {
+                        if (previousOffset != -1) {
+                            currentOffset = previousOffset;
+                        }
+                        previousOffset = fileOffset;
+                    }
+                    int bufferOffset = getOffset(myBufferedReader);
+                    long documentEnd = documentSource.toString().getBytes(StandardCharsets.UTF_8).length;
                     ParsedDocument parsedDoc = HTMLHandler.parseHTML(documentSource.toString());
+
                     if (CollectionHandler.insertDocument(parsedDoc, documentStart, documentEnd ) < 0) {
                         return;
                     }
@@ -109,8 +127,10 @@ public class CollectionParser {
         Field field = BufferedReader.class.getDeclaredField("nextChar");
         int result = 0;
         try {
+            field.setAccessible(true);
             result = (Integer) field.get(bufferedReader);
         } finally {
+            field.setAccessible(false);
 
         }
         return result;

@@ -12,11 +12,8 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
 import java.awt.*;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -211,20 +208,24 @@ public class QueryHandler {
         Scanner scanner = new Scanner(System.in);
         int beginningByte = Integer.parseInt(doc.get("beginningByte"));
         int endByte = Integer.parseInt(doc.get("endByte"));
-        FileInputStream fis = new FileInputStream(collection);
+        RandomAccessFile f = new RandomAccessFile(collection, "r");
+        f.seek(beginningByte);
+        byte[] data = new byte[endByte];
+        f.readFully(data,0,endByte);
+//        FileInputStream fis = new FileInputStream(collection);
+//        System.out.println(beginningByte+"asd"+endByte);
+//        ByteBuffer bytes = ByteBuffer.allocate(endByte-beginningByte);
+//        fis.getChannel().read(bytes, beginningByte);
 
-        ByteBuffer bytes = ByteBuffer.allocate(endByte-beginningByte);
-        fis.getChannel().read(bytes, beginningByte);
-
-        byte[] readBytes = bytes.array();
-        String htmlPage = new String(readBytes, StandardCharsets.UTF_8);
+//        byte[] readBytes = bytes.array();
+        String htmlPage = new String(data, StandardCharsets.UTF_8);
 
         File file = new File("temp.html");
 
         FileWriter writer = new FileWriter(file);
         writer.write(htmlPage);
         writer.close();
-            Desktop.getDesktop().browse(file.toURI());
+        Desktop.getDesktop().browse(file.toURI());
 
 
     }
