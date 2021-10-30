@@ -41,47 +41,32 @@ public class CollectionParser {
         try(RandomAccessFile randomAccessFile = new RandomAccessFile(collectionPath, "r");)
         {
 
-            BufferedReader myBufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(randomAccessFile.getFD()), "UTF-8"));
             String currentDocString = "";
-            long currentOffset = 0;
-            long previousOffset = -1;
-            Long documentStart = 0L;
-            for(String currentLine="";currentLine!=null;currentLine=myBufferedReader.readLine())
+
+
+            BigInteger byteCount = BigInteger.valueOf((Integer)(currentDocString.getBytes(StandardCharsets.UTF_8).length));
+            Pattern pathEndHtml = Pattern.compile("</html.*?>");
+            Pattern patHtml = Pattern.compile("<html.*?>");
+            Pattern patDoctype = Pattern.compile(".*?<!DOCTYPE.*?>");
+            Long documentStart = 0l;
+            for(String currentLine="";currentLine!=null;currentLine=randomAccessFile.readLine())
 
             {
-                long fileOffset = randomAccessFile.getFilePointer();
-                if (fileOffset != previousOffset) {
-                    if (previousOffset != -1) {
-                        currentOffset = previousOffset;
-                    }
-                    previousOffset = fileOffset;
-                }
-                int bufferOffset = getOffset(myBufferedReader);
-                long realposition = currentOffset + bufferOffset;
                 if(patDoctype.matcher(currentLine).matches())
                 {
                     // If we find a possible html start point we save that byte count to index late
-                    documentStart=realposition;
+                    documentStart = randomAccessFile.getFilePointer();
 
                 }
                 else if(patHtml.matcher(currentLine).matches())
                 {
-                    fileOffset = randomAccessFile.getFilePointer();
-                    if (fileOffset != previousOffset) {
-                    if (previousOffset != -1) {
-                        currentOffset = previousOffset;
-                    }
-                    previousOffset = fileOffset;
-                    }
-                    bufferOffset = getOffset(myBufferedReader);
-                    realposition = currentOffset + bufferOffset;
                     // If we find an opening html tag then we need to parse all the content into a single string to open the document in jsoup
                     StringBuilder documentSource = new StringBuilder();
                     documentSource = new StringBuilder(documentSource.toString().concat(currentLine));
                     while(!pathEndHtml.matcher((currentLine)).matches())
                     {
                         // Gets next line and adds it to the source string
-                        currentLine = myBufferedReader.readLine();
+                        currentLine = randomAccessFile.readLine();
                         if(currentLine==null){
                             return;
                         }
@@ -89,10 +74,10 @@ public class CollectionParser {
                     }
                     //End of the doc
 
-                    long documentEnd = documentSource.toString().getBytes(StandardCharsets.UTF_8).length;
+                    Long documentEnd = randomAccessFile.getFilePointer();;
                     ParsedDocument parsedDoc = HTMLHandler.parseHTML(documentSource.toString());
 
-                    if (CollectionHandler.insertDocument(parsedDoc, realposition, documentEnd ) < 0) {
+                    if (CollectionHandler.insertDocument(parsedDoc, documentStart, documentEnd ) < 0) {
                         return;
                     }
                 }

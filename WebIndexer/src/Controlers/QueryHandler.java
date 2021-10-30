@@ -245,18 +245,13 @@ public class QueryHandler {
         Scanner scanner = new Scanner(System.in);
         int beginningByte = Integer.parseInt(doc.get("beginningByte"));
         int endByte = Integer.parseInt(doc.get("endByte"));
-        RandomAccessFile f = new RandomAccessFile(collection, "r");
-        f.seek(beginningByte);
-        byte[] data = new byte[endByte];
-        f.readFully(data,0,endByte);
-        f.close();
-//        FileInputStream fis = new FileInputStream(collection);
-//        System.out.println(beginningByte+"asd"+endByte);
-//        ByteBuffer bytes = ByteBuffer.allocate(endByte-beginningByte);
-//        fis.getChannel().read(bytes, beginningByte);
+        FileInputStream fis = new FileInputStream(collection);
 
-//        byte[] readBytes = bytes.array();
-        String htmlPage = new String(data, StandardCharsets.UTF_8);
+        ByteBuffer bytes = ByteBuffer.allocate(endByte-beginningByte);
+        fis.getChannel().read(bytes, beginningByte);
+
+        byte[] readBytes = bytes.array();
+        String htmlPage = new String(readBytes, StandardCharsets.UTF_8);
 
         File file = new File("temp.html");
 
