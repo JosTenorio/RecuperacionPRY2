@@ -41,7 +41,7 @@ public class CollectionParser {
         try(RandomAccessFile randomAccessFile = new RandomAccessFile(collectionPath, "r");)
         {
 
-            BufferedReader myBufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(randomAccessFile.getFD()), "ISO-8859-1"));
+            BufferedReader myBufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(randomAccessFile.getFD()), "UTF-8"));
             String currentDocString = "";
             long currentOffset = 0;
             long previousOffset = -1;
@@ -66,8 +66,16 @@ public class CollectionParser {
                 }
                 else if(patHtml.matcher(currentLine).matches())
                 {
+                    fileOffset = randomAccessFile.getFilePointer();
+                    if (fileOffset != previousOffset) {
+                    if (previousOffset != -1) {
+                        currentOffset = previousOffset;
+                    }
+                    previousOffset = fileOffset;
+                    }
+                    bufferOffset = getOffset(myBufferedReader);
+                    realposition = currentOffset + bufferOffset;
                     // If we find an opening html tag then we need to parse all the content into a single string to open the document in jsoup
-                    documentStart=realposition;
                     StringBuilder documentSource = new StringBuilder();
                     documentSource = new StringBuilder(documentSource.toString().concat(currentLine));
                     while(!pathEndHtml.matcher((currentLine)).matches())
@@ -84,7 +92,7 @@ public class CollectionParser {
                     long documentEnd = documentSource.toString().getBytes(StandardCharsets.UTF_8).length;
                     ParsedDocument parsedDoc = HTMLHandler.parseHTML(documentSource.toString());
 
-                    if (CollectionHandler.insertDocument(parsedDoc, documentStart, documentEnd ) < 0) {
+                    if (CollectionHandler.insertDocument(parsedDoc, realposition, documentEnd ) < 0) {
                         return;
                     }
                 }

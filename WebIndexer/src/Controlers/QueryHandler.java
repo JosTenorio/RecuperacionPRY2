@@ -60,7 +60,6 @@ public class QueryHandler {
         String line ="";
         while(line!=null){
             line = myBufferedReader.readLine();
-            System.out.println(line);
             result.add(line);
         }
     return result;
@@ -119,7 +118,7 @@ public class QueryHandler {
                 doc = searcher.doc(result[i-1].doc);
                 last20Docs.add(doc);
                 System.out.println("["+i+"] "+"Título del documento:  "+doc.get("titulo"));
-                System.out.println("---------------------------------------------------------\nMenú de opciones\n1. Ver los siguiente 20 resultados\n2. Ver los anteriores 20 resultados\n3" +
+                System.out.println("--------------------------------------------------------- \nMenú de opciones\n1. Ver los siguiente 20 resultados\n2. Ver los anteriores 20 resultados\n3" +
                         ". Obtener el documento de un resultado\n4. Obtener los enlaces de un documento\nPara salir presiona cualquier otra tecla\n---------------------------------------------------------");
                 System.out.flush();
                 option = scanner.nextLine();
@@ -160,7 +159,7 @@ public class QueryHandler {
         // Menu in case of less than 20 documents
         if(result.length<20){
             while(true) {
-                System.out.println("-----Menú de opciones-----\n1 --> Obtener el documento de un resultado\n2 --> Obtener los enlaces de un documento\n3 Salir\n ");
+                System.out.println("\"---------------------------------------------------------\\nMenú de opciones\n1 --> Obtener el documento de un resultado\n2 --> Obtener los enlaces de un documento\n3 Salir\n ");
                 option = scanner.nextLine();
                 switch (option) {
                     // Selects document to show
