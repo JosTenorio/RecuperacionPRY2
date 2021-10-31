@@ -113,7 +113,12 @@ public class CollectionHandler {
     public static int insertDocument(ParsedDocument document, Long docBeginning, Long docEnd){
         try {
             if (writer.isOpen()){
-                addDoc(writer, document, docBeginning, docEnd);
+                try {
+                    addDoc(writer, document, docBeginning, docEnd);
+                } catch (IllegalArgumentException ex) {
+                    System.out.println(document.title);
+                    return -1;
+                }
             } else {
                 System.out.println("\n El escritor creado se ha cerrrado antes de poder indexar un documento.");
                 return -1;
@@ -125,7 +130,7 @@ public class CollectionHandler {
         return 1;
     }
 
-    private static void addDoc(IndexWriter w, ParsedDocument parsedDoc, BigInteger docBeginning, BigInteger docEnd) throws IOException {
+    private static void addDoc(IndexWriter w, ParsedDocument parsedDoc, Long docBeginning, Long docEnd) throws IOException {
         ((TextField) doc.getField("texto")).setStringValue(parsedDoc.text);
         ((TextField) doc.getField("ref")).setStringValue(parsedDoc.ref);
         ((TextField) doc.getField("encab")).setStringValue(parsedDoc.headers);
@@ -167,6 +172,7 @@ public class CollectionHandler {
         analyzer = useStemmer ?
                 CustomAnalyzer.builder()
                         .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ_]+)", "group", "0")
+                        .addTokenFilter("length", "max", "32766", "min", "1")
                         .addTokenFilter("lowercase")
                         .addTokenFilter("stop", "words", stopWordsFile)
                         .addTokenFilter(SnowballPorterFilterFactory.class, "language", "Spanish")
@@ -174,6 +180,7 @@ public class CollectionHandler {
                 :
                 CustomAnalyzer.builder()
                         .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ_]+)", "group", "0")
+                        .addTokenFilter("length", "max", "32766", "min", "1")
                         .addTokenFilter("lowercase")
                         .addTokenFilter("stop", "words", stopWordsFile)
                         .addTokenFilter(AccentFilterFactory.class, accentFilterParams)
@@ -188,6 +195,7 @@ public class CollectionHandler {
         analyzer =
                 CustomAnalyzer.builder()
                         .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ_]+)", "group", "0")
+                        .addTokenFilter("length", "max", "32766", "min", "1")
                         .addTokenFilter("lowercase")
                         .addTokenFilter(AccentFilterFactory.class, accentFilterParams)
                         .addTokenFilter("stop", "words", stopWordsFile)
