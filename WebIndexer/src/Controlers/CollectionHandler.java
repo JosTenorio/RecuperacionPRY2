@@ -125,7 +125,7 @@ public class CollectionHandler {
         return 1;
     }
 
-    private static void addDoc(IndexWriter w, ParsedDocument parsedDoc, BigInteger docBeginning, BigInteger docEnd) throws IOException {
+    private static void addDoc(IndexWriter w, ParsedDocument parsedDoc, Long docBeginning, Long docEnd) throws IOException {
         ((TextField) doc.getField("texto")).setStringValue(parsedDoc.text);
         ((TextField) doc.getField("ref")).setStringValue(parsedDoc.ref);
         ((TextField) doc.getField("encab")).setStringValue(parsedDoc.headers);
