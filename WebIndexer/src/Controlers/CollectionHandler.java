@@ -167,6 +167,7 @@ public class CollectionHandler {
         analyzer = useStemmer ?
                 CustomAnalyzer.builder()
                         .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ_]+)", "group", "0")
+                        .addTokenFilter("length", "max", "32766", "min", "1")
                         .addTokenFilter("lowercase")
                         .addTokenFilter("stop", "words", stopWordsFile)
                         .addTokenFilter(SnowballPorterFilterFactory.class, "language", "Spanish")
@@ -174,6 +175,7 @@ public class CollectionHandler {
                 :
                 CustomAnalyzer.builder()
                         .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ_]+)", "group", "0")
+                        .addTokenFilter("length", "max", "32766", "min", "1")
                         .addTokenFilter("lowercase")
                         .addTokenFilter("stop", "words", stopWordsFile)
                         .addTokenFilter(AccentFilterFactory.class, accentFilterParams)
@@ -188,6 +190,7 @@ public class CollectionHandler {
         analyzer =
                 CustomAnalyzer.builder()
                         .withTokenizer("pattern", "pattern", "([A-Za-zÁÉÍÓÚÜáéíóúüÑñ_]+)", "group", "0")
+                        .addTokenFilter("length", "max", "32766", "min", "1")
                         .addTokenFilter("lowercase")
                         .addTokenFilter(AccentFilterFactory.class, accentFilterParams)
                         .addTokenFilter("stop", "words", stopWordsFile)

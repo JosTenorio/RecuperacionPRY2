@@ -74,7 +74,7 @@ public class CollectionParser {
                     }
                     //End of the doc
 
-                    Long documentEnd = randomAccessFile.getFilePointer();;
+                    long documentEnd = documentSource.toString().getBytes(StandardCharsets.UTF_8).length;
                     ParsedDocument parsedDoc = HTMLHandler.parseHTML(documentSource.toString());
 
                     if (CollectionHandler.insertDocument(parsedDoc, documentStart, documentEnd ) < 0) {

@@ -242,12 +242,11 @@ public class QueryHandler {
         return null;
     }
     public static void openInBrowser(Document doc,String collection) throws IOException {
-        Scanner scanner = new Scanner(System.in);
-        int beginningByte = Integer.parseInt(doc.get("beginningByte"));
+        Long beginningByte = Long.parseLong(doc.get("beginningByte"));
         int endByte = Integer.parseInt(doc.get("endByte"));
         FileInputStream fis = new FileInputStream(collection);
 
-        ByteBuffer bytes = ByteBuffer.allocate(endByte-beginningByte);
+        ByteBuffer bytes = ByteBuffer.allocate(endByte);
         fis.getChannel().read(bytes, beginningByte);
 
         byte[] readBytes = bytes.array();
@@ -259,7 +258,5 @@ public class QueryHandler {
         writer.write(htmlPage);
         writer.close();
         Desktop.getDesktop().browse(file.toURI());
-
-
     }
 }
