@@ -205,13 +205,16 @@ public class QueryHandler {
     }
     public static void getEnlaces(Document doc){
         String enlace;
-        for(int i=0;true;i++){
+        for(int i=1;true;i++){
             enlace = doc.get("enlace".concat(Integer.toString(i)));
             if(enlace==null){
                 break;
             }
             System.out.println(enlace);
         }
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Presione enter para volver al menú anterior");
+        scanner.nextLine();
     }
 
     public static Document selectDoc(ArrayList<Document> docs){
