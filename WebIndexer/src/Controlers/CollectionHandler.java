@@ -131,29 +131,18 @@ public class CollectionHandler {
     }
 
     private static void addDoc(IndexWriter w, ParsedDocument parsedDoc, Long docBeginning, Long docEnd) throws IOException {
-        ((TextField) doc.getField("texto")).setStringValue(parsedDoc.text);
-        ((TextField) doc.getField("ref")).setStringValue(parsedDoc.ref);
-        ((TextField) doc.getField("encab")).setStringValue(parsedDoc.headers);
-        ((TextField) doc.getField("titulo")).setStringValue(parsedDoc.title);
-        ((StringField) doc.getField("beginningByte")).setStringValue(docBeginning.toString());
-        ((StringField) doc.getField("endByte")).setStringValue(docEnd.toString());
-        int i = 1;
-        int maxLink = parsedDoc.enlace.size();
-        String linkFieldName = "enlace".concat(Integer.toString(i));
-        while (doc.getField(linkFieldName) != null) {
-            if (i <= maxLink) {
-                ((StringField) doc.getField(linkFieldName)).setStringValue(parsedDoc.enlace.get(i - 1));
-            } else {
-                doc.removeField(linkFieldName);
-            }
-            i++;
-            linkFieldName = "enlace".concat(Integer.toString(i));
-        }
-        while (i <= maxLink) {
-            doc.add(new StringField(linkFieldName, parsedDoc.enlace.get(i - 1), Field.Store.YES));
-            linkFieldName = "enlace".concat(Integer.toString(i));
+        Document doc = new Document();
+        doc.add(new TextField("texto", parsedDoc.text, Field.Store.YES));
+        doc.add(new TextField("ref", parsedDoc.ref, Field.Store.YES));
+        doc.add(new TextField("encab", parsedDoc.headers, Field.Store.YES));
+        doc.add(new TextField("titulo", parsedDoc.title, Field.Store.YES));
+        int i = 0;
+        for (String link : parsedDoc.enlace) {
+            doc.add(new StringField("enlace".concat(Integer.toString(i)), link, Field.Store.YES));
             i++;
         }
+        doc.add(new StringField("beginningByte", docBeginning.toString(), Field.Store.YES));
+        doc.add(new StringField("endByte", docEnd.toString(), Field.Store.YES));
         w.addDocument(doc);
     }
 
