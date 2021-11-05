@@ -2,15 +2,9 @@ package Controlers;
 
 import Models.ParsedDocument;
 import Utils.StopWordsHandler;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.LineIterator;
-import org.apache.lucene.store.Directory;
-
 
 import java.io.*;
 import java.lang.reflect.Field;
-import java.math.BigInteger;
-import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
@@ -83,7 +77,13 @@ public class CollectionParser {
                         // Gets next line and adds it to the source string
                         currentLine = myBufferedReader.readLine();
                         if(currentLine==null){
-                            System.out.println("Petó una línea");
+                            CollectionHandler.closeWriter();
+                            try {
+                                StopWordsHandler.saveStopwords(stopwordsDeposit, indexPath);
+                            } catch (IOException e) {
+                                System.out.println("\n No se ha podido guardar las stopwords usadas en el índice creado");
+                                return;
+                            }
                             return;
                         }
                         documentSource.append(currentLine);
@@ -94,7 +94,6 @@ public class CollectionParser {
                     ParsedDocument parsedDoc = HTMLHandler.parseHTML(documentSource.toString());
 
                     if (CollectionHandler.insertDocument(parsedDoc, realposition, documentEnd ) < 0) {
-                        System.out.println("Petó un documento");
                         return;
                     }
                 }
@@ -105,7 +104,6 @@ public class CollectionParser {
             } catch (IOException e) {
                 System.out.println("\n No se ha podido guardar las stopwords usadas en el índice creado");
                 return;
-
             }
         } catch (IOException e)
         {   e.printStackTrace();
