@@ -114,7 +114,7 @@ public class QueryHandler {
         ArrayList<Document> last20Docs = new ArrayList<Document>();
         for(int i =1;i<= result.length;i++){
             // Stops to ask for user input
-            if(i%20==0 && i!=0){
+            if(i%20==0 && i!=0 || i == result.length){
                 doc = searcher.doc(result[i-1].doc);
                 last20Docs.add(doc);
                 System.out.println("["+i+"] "+"Título del documento:  "+doc.get("titulo"));
@@ -124,10 +124,18 @@ public class QueryHandler {
                 option = scanner.nextLine();
                 switch (option) {
                     // Continues with the next 20 results
-                    case "1" -> {i++;}
+                    case "1" -> {
+                        if (i + 1 > result.length) {
+                            if(i<=40){i=1;}
+                            else {i-=39;}
+                        }
+                        else {
+                            i++;
+                        }
+                    }
                     // Shows the past 20 results if possible
                     case "2" -> {
-                        if(i==20){i=1;}
+                        if(i<=40){i=1;}
                         else {i-=39;}
                     }
                     // Opens a given document in a web browser
@@ -157,9 +165,9 @@ public class QueryHandler {
             System.out.println("["+i+"]"+"Título del documento:  "+doc.get("titulo"));
         }
         // Menu in case of less than 20 documents
-        if(result.length<20){
+        if(last20Docs.size()<20){
             while(true) {
-                System.out.println("\"---------------------------------------------------------\\nMenú de opciones\n1 --> Obtener el documento de un resultado\n2 --> Obtener los enlaces de un documento\n3 Salir\n ");
+                System.out.println("---------------------------------------------------------\nMenú de opciones\n1. Obtener el documento de un resultado\n2. Obtener los enlaces de un documento\n3. Salir");
                 option = scanner.nextLine();
                 switch (option) {
                     // Selects document to show
@@ -220,7 +228,6 @@ public class QueryHandler {
         for(int o=0;o<docs.size();o++){
             System.out.println("["+o+"]" +docs.get(o).get("titulo"));
         }
-        System.out.println("Opcion: 3");
         String doc = scanner.nextLine();
         try{
             int docId = Integer.parseInt(doc);
@@ -244,10 +251,10 @@ public class QueryHandler {
     public static void openInBrowser(Document doc,String collection) throws IOException {
         Scanner scanner = new Scanner(System.in);
         Long beginningByte = Long.parseLong(doc.get("beginningByte"));
-        int endByte = Integer.parseInt(doc.get("endByte"));
+        Long endByte = Long.parseLong(doc.get("endByte"));
         FileInputStream fis = new FileInputStream(collection);
 
-        ByteBuffer bytes = ByteBuffer.allocate(endByte);
+        ByteBuffer bytes = ByteBuffer.allocate(Math.toIntExact(endByte));
         fis.getChannel().read(bytes, beginningByte);
 
         byte[] readBytes = bytes.array();

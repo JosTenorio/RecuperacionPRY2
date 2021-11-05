@@ -63,6 +63,7 @@ public class CollectionHandler {
 
     public static void closeWriter () throws IOException {
         if ((writer != null) && (writer.isOpen())) {
+            writer.commit();
             writer.close();
         }
     }

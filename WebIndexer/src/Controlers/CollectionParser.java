@@ -83,6 +83,7 @@ public class CollectionParser {
                         // Gets next line and adds it to the source string
                         currentLine = myBufferedReader.readLine();
                         if(currentLine==null){
+                            System.out.println("Petó una línea");
                             return;
                         }
                         documentSource.append(currentLine);
@@ -93,6 +94,7 @@ public class CollectionParser {
                     ParsedDocument parsedDoc = HTMLHandler.parseHTML(documentSource.toString());
 
                     if (CollectionHandler.insertDocument(parsedDoc, realposition, documentEnd ) < 0) {
+                        System.out.println("Petó un documento");
                         return;
                     }
                 }
