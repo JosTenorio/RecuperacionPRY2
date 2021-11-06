@@ -142,13 +142,13 @@ public class QueryHandler {
                     case "3" ->{
                         clearScreen();
                         getDocumentHandler(last20Docs,collectionPath);
-                        if(i==20){i=1;}
+                        if(i<=40){i=1;}
                         else {i-=39;}
                     }
                     // Get all the links in a given document
                     case "4" ->{
                         getEnlacesHandler(last20Docs);
-                        if(i==20){i=1;}
+                        if(i<=40){i=1;}
                         else {i-=39;}
                     }
                     default -> {
