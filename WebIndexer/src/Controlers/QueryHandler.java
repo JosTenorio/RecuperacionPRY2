@@ -14,11 +14,9 @@ import org.apache.lucene.store.FSDirectory;
 
 import java.awt.*;
 import java.io.*;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 
@@ -157,7 +155,6 @@ public class QueryHandler {
                     }
                 }
                 last20Docs.clear();
-                clearScreen();
                 System.out.println("Resultados\n---------------------------------------------------------");
             }
             doc = searcher.doc(result[i-1].doc);
